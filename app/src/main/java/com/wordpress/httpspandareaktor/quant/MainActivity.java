@@ -5,6 +5,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -19,6 +20,7 @@ import org.jsoup.nodes.Element;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.TreeMap;
 
 public class MainActivity extends AppCompatActivity implements FetchCallback {
 
@@ -37,8 +39,6 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
     //is the AsyncTask currently running?
     boolean currentlyRunning;
 
-    //hash from Abathur that analyzes frequency
-    HashMap<String, Integer> frequencyHash;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
         //get references to the Views
         dataFeed = (TextView) findViewById(R.id.dataFeed);
         inputURL = (EditText) findViewById(R.id.inputURL);
+        inputURL.setTextIsSelectable(true);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         topWords = (TextView) findViewById(R.id.topWords);
 
@@ -68,9 +69,11 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
             DownloadAsyncTask mDownloadAsyncTask = new DownloadAsyncTask(this);
 
             //if currently not running, execute the DownloadAsyncTask
-            if (currentlyRunning == false) {
+            if (!currentlyRunning) {
                 currentlyRunning = true;
                 progressBar.setVisibility(View.VISIBLE);
+
+                //execute the asyncTask
                 mDownloadAsyncTask.execute(currentURL);
             } else {
                 Toast.makeText(this, "Wait until the current task is finished!", Toast.LENGTH_SHORT).show();
@@ -97,12 +100,8 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
                 dataFeed.setText(s);
 
                 //use frequency map generate in Abathur, append values to topWords TextView
-                frequencyHash = Abathur.findFrequency(s);
-                for (HashMap.Entry<String, Integer> entry: frequencyHash.entrySet()) {
-                    topWords.append(entry.getKey().toString() + ": ");
-                    topWords.append(entry.getValue().toString() + "  ");
-                    topWords.setVisibility(View.VISIBLE);
-                }
+                topWords.setText(Abathur.findFrequency(s));
+                topWords.setVisibility(View.VISIBLE);
 
             } else {
                 Toast.makeText(this, "Extraction returned with nothing, check URL!", Toast.LENGTH_SHORT).show();

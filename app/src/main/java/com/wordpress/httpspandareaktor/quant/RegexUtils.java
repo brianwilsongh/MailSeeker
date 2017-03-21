@@ -16,21 +16,20 @@ public class RegexUtils {
         //booleans are filters that take month, day, very common words like "a" and "the"
         //split input into array to clean using delimiter of unlimited whitespace to capture everything
         String[] dirtyWordArray = input.split("\\s+");
-        Log.v("RegexUtils.cleanText", "dirtywordarray pos 1 is " + dirtyWordArray[0]);
         StringBuilder cleanString = new StringBuilder();
 
         //use enhanced for loop to clean out non-alpha
         //include words with comma, period, exclaimation, apostrophe at start/fin, etc...
         for (String word : dirtyWordArray) {
             if (word.matches("[a-z[A-Z]]+") && !word.matches("null")){
-                if (passesFilter(word, filterMonth, filterDay, filterCommon)) {
+                if (passesFilter(word.toLowerCase(), filterMonth, filterDay, filterCommon)) {
                     cleanString.append(word + " ");
                 }
 
 
             } else if ((word.matches("[a-z[A-Z]]+\\!?") || word.matches("[a-zA-Z]+\\.?") || word.matches("[a-zA-Z]+\\??"))
                     && !word.matches("null")){
-                if (passesFilter(word, filterMonth, filterDay, filterCommon)) {
+                if (passesFilter(word.toLowerCase(), filterMonth, filterDay, filterCommon)) {
                     cleanString.append(word.substring(0, word.length() - 1) + " ");
                 }
             } else {
@@ -44,14 +43,15 @@ public class RegexUtils {
 
 
     private static boolean passesFilter(String word, boolean filterMonth, boolean filterDay, boolean filterCommon){
-        String[] monthStrings = new String[]{"January", "February", "March", "April", "May", "June", "July",
-                "August", "September", "October", "November", "December"};
+        String[] monthStrings = new String[]{"january", "february", "march", "april", "may", "june", "july",
+                "august", "september", "october", "november", "december"};
 
-        String[] dayStrings = new String[]{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
+        String[] dayStrings = new String[]{"monday", "tuesday", "wednesday", "thursday", "friday"};
 
-        String[] commonStrings = new String[]{"the", "be", "to", "of", "and", "a", "in", "that",
-                "have", "I", "it", "for", "not", "on", "with", "he", "she", "as", "you", "do", "at",
-                "or", "an", "will", "their", "there"};
+        String[] commonStrings = new String[]{"the", "be", "to", "of", "and", "a", "in", "that", "is",
+                "have", "i", "it", "for", "not", "on", "with", "he", "she", "as", "you", "do", "at",
+                "or", "an", "will", "their", "there", "by", "Comment", "comment", "comments", "date",
+        "how", "from", "et:", "more", "are", "your", "am:", "pm:"};
 
         if (Arrays.asList(monthStrings).contains(word)){
             return false;
