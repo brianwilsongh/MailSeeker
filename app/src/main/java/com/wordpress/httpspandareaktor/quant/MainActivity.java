@@ -18,34 +18,53 @@ import org.jsoup.nodes.Element;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements FetchCallback {
 
     //this TextView will display the data
     TextView dataFeed;
+
+    //this textview shows topwords, start as view.gone
+    TextView topWords;
+
+    //this EditText is where the user's URL input goes
     EditText inputURL;
+
+    //the progress bar that starts invisible but is b
     ProgressBar progressBar;
+
+    //is the AsyncTask currently running?
     boolean currentlyRunning;
+
+    //hash from Abathur that analyzes frequency
+    HashMap<String, Integer> frequencyHash;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //get references to the editText field for URL
+        //get references to the Views
         dataFeed = (TextView) findViewById(R.id.dataFeed);
         inputURL = (EditText) findViewById(R.id.inputURL);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        topWords = (TextView) findViewById(R.id.topWords);
+
+        //AsyncTask currently NOT running, thus:
         currentlyRunning = false;
 
 
     }
 
 
-    public void extractButton(View view){
+    public void extractButton(View view) {
+        //User just typed in a URL and requested fetch
         if (inputURL.getText().toString() != "") {
-
+            //if not empty, try to build URL, makeURL shoudld catch MalformedURLException
             URL currentURL = makeURL(inputURL.getText().toString());
+
+            //if good to go, make a new AsyncTask, if no others are running make a new instance and execute
             DownloadAsyncTask mDownloadAsyncTask = new DownloadAsyncTask(this);
 
             //if currently not running, execute the DownloadAsyncTask
@@ -61,17 +80,39 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
         }
     }
 
+    public void clearURL(View view) {
+        inputURL.setText("");
+    }
+
     @Override
     public void onFinish(String s) {
 
-        //we're testing Jsoup here
+        if (s != null) {
+            //we're testing Jsoup here
+            Document doc = Jsoup.parse(s);
+            s = RegexUtils.cleanText(doc.body().text(), true, true, true);
 
-        Document doc = Jsoup.parse(s);
-        s = RegexUtils.cleanText(doc.body().text());
+            //set the desired text in the box
+            if (!(s.equals(""))) {
+                dataFeed.setText(s);
 
-        //set the desired text in the box, no longer running so now false
+                //use frequency map generate in Abathur, append values to topWords TextView
+                frequencyHash = Abathur.findFrequency(s);
+                for (HashMap.Entry<String, Integer> entry: frequencyHash.entrySet()) {
+                    topWords.append(entry.getKey().toString() + ": ");
+                    topWords.append(entry.getValue().toString() + "  ");
+                    topWords.setVisibility(View.VISIBLE);
+                }
+
+            } else {
+                Toast.makeText(this, "Extraction returned with nothing, check URL!", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(this, "Extraction returned with nothing, check URL!", Toast.LENGTH_SHORT).show();
+        }
+
+        //when not running AsyncTask, hide ProgressBar and set boolean to false
         progressBar.setVisibility(View.GONE);
-        dataFeed.setText(s);
         currentlyRunning = false;
     }
 
@@ -96,7 +137,6 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
         }
         return returnURL;
     }
-
 
 
 }
