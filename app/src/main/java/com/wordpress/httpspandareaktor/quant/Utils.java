@@ -41,7 +41,7 @@ public class Utils {
         //now extract substring from strings, domain name, to take care of www or not www in URLs
         String siteNameA = "";
         //search for the pattern I want, like "google.com" in http://www.google.com/maps using RegEx
-        Pattern patternA = Pattern.compile("([^\\.]+)\\.([^\\.]+)$");
+        Pattern patternA = Pattern.compile("([^\\.]+)\\.(co.)?([^\\.]+)$");
         Matcher matcherA = patternA.matcher(hostA);
         if (matcherA.find())
         {
@@ -50,7 +50,7 @@ public class Utils {
 
         String siteNameB = "";
         //search for the pattern I want, like "google.com/" in http://www.google.com/maps
-        Pattern patternB = Pattern.compile("([^\\.]+)\\.([^\\.]+)$");
+        Pattern patternB = Pattern.compile("([^\\.]+)\\.(co.)?([^\\.]+)$");
         Matcher matcherB = patternB.matcher(hostB);
         if (matcherB.find())
         {

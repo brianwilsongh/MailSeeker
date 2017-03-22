@@ -56,7 +56,7 @@ public class RegexUtils {
                 "or", "an", "will", "their", "there", "by", "Comment", "comment", "comments", "date",
         "how", "from", "et", "more", "are", "your", "am", "pm", "site", "why", "where", "our", "this",
                 "about", "us", "if", "about", "find", "but", "out", "we", "all", "after", "before",
-        "say", "says", "new"};
+        "say", "says", "new", "what", "over"};
 
         if (Arrays.asList(monthStrings).contains(word)){
             return false;
