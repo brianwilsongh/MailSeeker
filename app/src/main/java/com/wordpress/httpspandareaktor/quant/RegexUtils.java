@@ -52,9 +52,11 @@ public class RegexUtils {
         String[] dayStrings = new String[]{"monday", "tuesday", "wednesday", "thursday", "friday"};
 
         String[] commonStrings = new String[]{"the", "be", "to", "of", "and", "a", "in", "that", "is",
-                "have", "i", "it", "for", "not", "on", "with", "he", "she", "as", "you", "do", "at",
+                "have", "i", "it", "its", "for", "not", "on", "with", "he", "she", "his", "her", "as", "you", "do", "at",
                 "or", "an", "will", "their", "there", "by", "Comment", "comment", "comments", "date",
-        "how", "from", "et", "more", "are", "your", "am", "pm", "site", "why", "where"};
+        "how", "from", "et", "more", "are", "your", "am", "pm", "site", "why", "where", "our", "this",
+                "about", "us", "if", "about", "find", "but", "out", "we", "all", "after", "before",
+        "say", "says", "new"};
 
         if (Arrays.asList(monthStrings).contains(word)){
             return false;
