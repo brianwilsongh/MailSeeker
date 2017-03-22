@@ -3,7 +3,10 @@ package com.wordpress.httpspandareaktor.quant;
 import android.util.Log;
 
 import java.lang.reflect.Array;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
+import java.util.regex.Pattern;
 
 /**
  * Created by brian on 3/20/17.
@@ -51,7 +54,7 @@ public class RegexUtils {
         String[] commonStrings = new String[]{"the", "be", "to", "of", "and", "a", "in", "that", "is",
                 "have", "i", "it", "for", "not", "on", "with", "he", "she", "as", "you", "do", "at",
                 "or", "an", "will", "their", "there", "by", "Comment", "comment", "comments", "date",
-        "how", "from", "et:", "more", "are", "your", "am:", "pm:"};
+        "how", "from", "et", "more", "are", "your", "am", "pm", "site", "why", "where"};
 
         if (Arrays.asList(monthStrings).contains(word)){
             return false;

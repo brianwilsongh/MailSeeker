@@ -16,6 +16,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.examples.HtmlToPlainText;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -30,8 +31,12 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
     //this textview shows topwords, start as view.gone
     TextView topWords;
 
-    //this EditText is where the user's URL input goes
+    //this textiew shows the urls found on the page, we will crawl later
+    TextView urlsDiscovered;
+
+    //this EditText is where the user's URL input goes, absolute URL is set to domain name
     EditText inputURL;
+    String absoluteURL;
 
     //the progress bar that starts invisible but is b
     ProgressBar progressBar;
@@ -51,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
         inputURL.setTextIsSelectable(true);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         topWords = (TextView) findViewById(R.id.topWords);
+        urlsDiscovered = (TextView) findViewById(R.id.urlsDiscovered);
 
         //AsyncTask currently NOT running, thus:
         currentlyRunning = false;
@@ -73,6 +79,9 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
                 currentlyRunning = true;
                 progressBar.setVisibility(View.VISIBLE);
 
+                //store the url query as a string so we can do stuff with it later
+                absoluteURL = inputURL.getText().toString();
+
                 //execute the asyncTask
                 mDownloadAsyncTask.execute(currentURL);
             } else {
@@ -93,7 +102,32 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
         if (s != null) {
             //we're testing Jsoup here
             Document doc = Jsoup.parse(s);
+
+            StringBuilder urlsFound = new StringBuilder();
+
+            Elements links = doc.select("a[href]");
+            Log.v("MainActivity.onFinish", " Jsoup found urls: " + links.toString());
+
+            for (Element link : links){
+                if (link.attr("abs:href") != "") {
+                    if (Utils.urlDomainNameMatch(link.attr("abs:href"), absoluteURL)){
+                        urlsFound.append("INTERNAL: " + link.attr("abs:href"));
+                        urlsFound.append("\n");
+                        urlsFound.append("\n");
+                    } else {
+                        urlsFound.append("EXTERNAL: " + link.attr("abs:href"));
+                        urlsFound.append("\n");
+                        urlsFound.append("\n");
+
+                    }
+                }
+            }
+
+            urlsDiscovered.setText(urlsFound.toString());
+
             s = RegexUtils.cleanText(doc.body().text(), true, true, true);
+
+
 
             //set the desired text in the box
             if (!(s.equals(""))) {

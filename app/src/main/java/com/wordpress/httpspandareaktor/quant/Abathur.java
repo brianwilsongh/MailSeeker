@@ -45,7 +45,8 @@ public class Abathur {
         List<HashMap.Entry<String, Integer>> entryList = new ArrayList<>(unsortedMap.entrySet());
         Log.v("Abathur.sortMap", " made list " + entryList.toString());
 
-        //sort the list with Collections and a comaprator that compares keys
+        //sort the list with Collections and a comaprator
+        // compares keys reverse the normal order since we want descending
         Collections.sort(entryList, new Comparator<HashMap.Entry<String, Integer>>() {
             @Override
             public int compare(HashMap.Entry<String, Integer> o1, HashMap.Entry<String, Integer> o2) {
@@ -59,7 +60,7 @@ public class Abathur {
             returner.append(entry.getKey());
             returner.append(": ");
             returner.append(entry.getValue());
-            returner.append("  ~  ");
+            returner.append("  -  ");
         }
         Log.v("Abathur.sortMap", " made string " + returner.toString());
         return returner.toString();

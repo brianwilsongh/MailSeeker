@@ -19,20 +19,19 @@
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="extractButton"
-                android:textColor="@android:color/white"
                 android:background="@color/colorAccent"
+                android:onClick="extractButton"
                 android:text="Extract"
-                android:textStyle="bold"/>
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
 
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Clear"
-                android:onClick="clearURL"
-                android:textColor="@android:color/white"
                 android:background="@color/colorPrimaryDark"
-                />
+                android:onClick="clearURL"
+                android:text="Clear"
+                android:textColor="@android:color/white" />
 
         </LinearLayout>
 
@@ -40,7 +39,7 @@
             android:id="@+id/inputURL"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:hint="http://www.example.com"/>
+            android:hint="http://www.example.com" />
 
     </LinearLayout>
 
@@ -59,23 +58,35 @@
         android:layout_margin="20dp"
         android:maxLines="3"
         android:textColor="@color/colorAccent"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
-
-        <TextView
-            android:id="@+id/dataFeed"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="uwotm8"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+    <TextView
+        android:id="@+id/urlsDiscovered"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="http://www.example.com"
+        android:layout_margin="10dp"
+        android:textStyle="bold"
+        android:textColor="#0000ff"/>
 
     </ScrollView>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+    <TextView
+        android:id="@+id/dataFeed"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="uwotm8" />
+
+    </ScrollView>
+
 
 </LinearLayout>
