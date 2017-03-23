@@ -47,16 +47,17 @@ public class RegexUtils {
 
     private static boolean passesFilter(String word, boolean filterMonth, boolean filterDay, boolean filterCommon){
         String[] monthStrings = new String[]{"january", "february", "march", "april", "may", "june", "july",
-                "august", "september", "october", "november", "december"};
+                "august", "september", "october", "november", "december", "jan", "feb", "mar", "apr", "may", "jun",
+        "jul", "aug", "sep", "oct", "nov", "dec"};
 
         String[] dayStrings = new String[]{"monday", "tuesday", "wednesday", "thursday", "friday"};
 
         String[] commonStrings = new String[]{"the", "be", "to", "of", "and", "a", "in", "that", "is",
                 "have", "i", "it", "its", "for", "not", "on", "with", "he", "she", "his", "her", "as", "you", "do", "at",
-                "or", "an", "will", "their", "there", "by", "Comment", "comment", "comments", "date",
+                "or", "a", "an", "will", "their", "there", "by", "comment", "comments", "date",
         "how", "from", "et", "more", "are", "your", "am", "pm", "site", "why", "where", "our", "this",
                 "about", "us", "if", "about", "find", "but", "out", "we", "all", "after", "before",
-        "say", "says", "new", "what", "over"};
+        "say", "says", "new", "what", "over", "lol", "just", "being", "was", "has", "still", "who", "into"};
 
         if (Arrays.asList(monthStrings).contains(word)){
             return false;

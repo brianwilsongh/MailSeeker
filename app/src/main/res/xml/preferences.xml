@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:key="seeker_settings"
+        android:title="Seeker Attributes">
+
+        <ListPreference
+            android:defaultValue="1"
+            android:entries="@array/arrayMaxPages"
+            android:entryValues="@array/arrayMaxPages"
+            android:key="seeker_maxPages"
+            android:summary="Click to set a maximum limit on the number of pages that the seeker can visit and extract"
+            android:title="Maximum HTML Page Count" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="filters_settings"
+        android:title="Filter Settings">
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="filter_months"
+            android:summary="Ignore words like 'January' and 'feb'"
+            android:title="Months" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="filter_days"
+            android:summary="Ignore words like 'Monday' and 'tue'"
+            android:title="Days" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="filter_common"
+            android:summary="Ignore very frequent words like 'the' and 'site'"
+            android:title="Common" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

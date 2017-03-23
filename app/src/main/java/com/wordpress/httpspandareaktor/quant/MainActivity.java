@@ -1,11 +1,17 @@
 package com.wordpress.httpspandareaktor.quant;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -22,6 +28,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.TreeMap;
+import java.util.prefs.Preferences;
 
 public class MainActivity extends AppCompatActivity implements FetchCallback {
 
@@ -44,6 +51,12 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
     //is the AsyncTask currently running?
     boolean currentlyRunning;
 
+    //shared preferences settings
+    boolean filterMonths;
+    boolean filterDays;
+    boolean filterCommon;
+    String maxLinesScrape;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,11 +74,44 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
         //AsyncTask currently NOT running, thus:
         currentlyRunning = false;
 
-
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //load the sharedPreferences here, in case user just came back from settings menu
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs.getAll();
+        filterMonths = prefs.getBoolean("filter_months", true);
+        filterDays = prefs.getBoolean("filter_days", true);
+        filterCommon = prefs.getBoolean("filter_common", true);
+        maxLinesScrape = prefs.getString("seeker_maxPages", "1");
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        //create the menu, currently holding just the settings page
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        //recursive listener for items on the menu
+        switch (item.getItemId()) {
+            case R.id.menu_goToSettings:
+                Intent intent = new Intent(this, Settings.class);
+                startActivity(intent);
+                return true;
+            default :
+                return onOptionsItemSelected(item);
+        }
+    }
 
     public void extractButton(View view) {
+
+        Log.v("MainActivity", " shared prefs m/d/c are" + filterMonths + filterDays + filterCommon + maxLinesScrape);
         //User just typed in a URL and requested fetch
         if (inputURL.getText().toString() != "") {
             //if not empty, try to build URL, makeURL shoudld catch MalformedURLException
