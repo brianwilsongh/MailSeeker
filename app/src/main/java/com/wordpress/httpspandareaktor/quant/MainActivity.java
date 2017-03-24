@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
     boolean filterMonths;
     boolean filterDays;
     boolean filterCommon;
-    String maxLinesScrape;
+    static String maxLinesScrape;
 
 
     @Override
@@ -104,37 +104,40 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
                 Intent intent = new Intent(this, Settings.class);
                 startActivity(intent);
                 return true;
-            default :
+            default:
                 return onOptionsItemSelected(item);
         }
     }
 
     public void extractButton(View view) {
 
-        Log.v("MainActivity", " shared prefs m/d/c are" + filterMonths + filterDays + filterCommon + maxLinesScrape);
         //User just typed in a URL and requested fetch
-        if (inputURL.getText().toString() != "") {
-            //if not empty, try to build URL, makeURL shoudld catch MalformedURLException
-            URL currentURL = makeURL(inputURL.getText().toString());
+        if (networkAvailable()) {
+            if (inputURL.getText().toString() != "") {
+                //if not empty, try to build URL, makeURL shoudld catch MalformedURLException
+                URL currentURL = NetworkUtils.makeURL(inputURL.getText().toString());
 
-            //if good to go, make a new AsyncTask, if no others are running make a new instance and execute
-            DownloadAsyncTask mDownloadAsyncTask = new DownloadAsyncTask(this);
+                //if good to go, make a new AsyncTask, if no others are running make a new instance and execute
+                DownloadAsyncTask mDownloadAsyncTask = new DownloadAsyncTask(this);
 
-            //if currently not running, execute the DownloadAsyncTask
-            if (!currentlyRunning) {
-                currentlyRunning = true;
-                progressBar.setVisibility(View.VISIBLE);
+                //if currently not running, execute the DownloadAsyncTask
+                if (!currentlyRunning) {
+                    currentlyRunning = true;
+                    progressBar.setVisibility(View.VISIBLE);
 
-                //store the url query as a string so we can do stuff with it later
-                absoluteURL = inputURL.getText().toString();
+                    //store the url query as a string so we can do stuff with it later
+                    absoluteURL = inputURL.getText().toString();
 
-                //execute the asyncTask
-                mDownloadAsyncTask.execute(currentURL);
+                    //execute the asyncTask
+                    mDownloadAsyncTask.execute(currentURL);
+                } else {
+                    Toast.makeText(this, "Wait until the current task is finished!", Toast.LENGTH_SHORT).show();
+                }
             } else {
-                Toast.makeText(this, "Wait until the current task is finished!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Cannot extract from an empty URL!", Toast.LENGTH_SHORT).show();
             }
         } else {
-            Toast.makeText(this, "Cannot extract from an empty URL!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Network unavailable!", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -152,11 +155,10 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
             StringBuilder urlsFound = new StringBuilder();
 
             Elements links = doc.select("a[href]");
-            Log.v("MainActivity.onFinish", " Jsoup found urls: " + links.toString());
 
-            for (Element link : links){
+            for (Element link : links) {
                 if (link.attr("abs:href") != "") {
-                    if (Utils.urlDomainNameMatch(link.attr("abs:href"), absoluteURL)){
+                    if (RegexUtils.urlDomainNameMatch(link.attr("abs:href"), absoluteURL)) {
                         urlsFound.append("INTERNAL: " + link.attr("abs:href"));
                         urlsFound.append("\n");
                         urlsFound.append("\n");
@@ -171,8 +173,7 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
 
             urlsDiscovered.setText(urlsFound.toString());
 
-            s = RegexUtils.cleanText(doc.body().text(), true, true, true);
-
+            s = RegexUtils.cleanText(doc.body().text(), filterMonths, filterDays, filterCommon);
 
 
             //set the desired text in the box
@@ -195,7 +196,7 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
         currentlyRunning = false;
     }
 
-    public boolean isNetworkAvailable() {
+    public boolean networkAvailable() {
         //returns boolean to determine whether network is available, requires ACCESS_NETWORK_STATE permission
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = cm.getActiveNetworkInfo();
@@ -205,16 +206,6 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
             return true;
         }
         return false;
-    }
-
-    public URL makeURL(String string) {
-        URL returnURL = null;
-        try {
-            returnURL = new URL(string);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-        return returnURL;
     }
 
 

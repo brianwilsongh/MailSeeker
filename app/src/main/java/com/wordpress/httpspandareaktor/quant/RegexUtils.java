@@ -6,6 +6,7 @@ import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -57,7 +58,9 @@ public class RegexUtils {
                 "or", "a", "an", "will", "their", "there", "by", "comment", "comments", "date",
         "how", "from", "et", "more", "are", "your", "am", "pm", "site", "why", "where", "our", "this",
                 "about", "us", "if", "about", "find", "but", "out", "we", "all", "after", "before",
-        "say", "says", "new", "what", "over", "lol", "just", "being", "was", "has", "still", "who", "into"};
+        "say", "says", "new", "what", "over", "lol", "just", "being", "was", "has", "still", "who", "into",
+         "me", "they", "go", "hi", "can", "my", "welcome", "something", "it", "there", "around", "used", "something",
+        "some", "around", "so", "up"};
 
         if (Arrays.asList(monthStrings).contains(word)){
             return false;
@@ -73,6 +76,55 @@ public class RegexUtils {
         return true;
 
     }
+
+
+    public static boolean urlDomainNameMatch(String urlA, String urlB){
+        //check if the host names of two urls match, regardless of www in front of them or not
+        //this currently checks if the url pulled by Jsoup matches the base URL input by the user
+
+
+        //build a url to make string for A, then B
+        String hostA = "";
+        try {
+            URL builtUrlA = new URL(urlA);
+            hostA = builtUrlA.getHost();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        String hostB = "";
+        try {
+            URL builtUrlB = new URL(urlB);
+            hostB = builtUrlB.getHost();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+
+
+        //now extract substring from strings, domain name, to take care of www or not www in URLs
+        String siteNameA = "";
+        //search for the pattern I want, like "google.com" in http://www.google.com/maps using RegEx
+        Pattern patternA = Pattern.compile("([^\\.]+)\\.(co.)?([^\\.]+)$");
+        Matcher matcherA = patternA.matcher(hostA);
+        if (matcherA.find())
+        {
+            siteNameA = matcherA.group();
+        }
+
+        String siteNameB = "";
+        //search for the pattern I want, like "google.com/" in http://www.google.com/maps
+        Pattern patternB = Pattern.compile("([^\\.]+)\\.(co.)?([^\\.]+)$");
+        Matcher matcherB = patternB.matcher(hostB);
+        if (matcherB.find())
+        {
+            siteNameB = matcherB.group();
+        }
+
+        return siteNameA.equals(siteNameB);
+
+    }
+
 
 
 
