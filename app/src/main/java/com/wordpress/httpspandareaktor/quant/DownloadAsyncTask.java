@@ -35,7 +35,6 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
 
     //create instance of listener interface
     private FetchCallback listener;
-    URL currentURL;
 
     //String array for onProgressUpdate
     private String[] updateArray = new String[3];
@@ -74,7 +73,7 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
         String lastResult = "";
 
 
-        int linksHit = 0;
+        int pagesHit = 0;
         firstLinkAsString = urls[0].toString();
 
         //first fetch is unique and sets up a few things or the other iterations
@@ -87,8 +86,9 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
         //add the lastest url to visited URLs arraylist, increment links hit counter, add to bucket
         visitedLinks.add(urls[0]);
         Log.v("DLAsync", " add to visitedLinks set: " + urls[0]);
-        linksHit ++;
         if (!lastResult.equals("")) {
+            //if the last result wasn't empty, it was a page hit. add the results into bucket
+            pagesHit ++;
             bucket = bucket.concat(lastResult);
         } else {
             return "First query returned nothing!";
@@ -99,52 +99,57 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
         Log.v("DLAsync", " completed INITIAL pull of links from first query");
         cleanCollectedUrls();
 
-        while (linksHit < mlinksMaximum && !isCancelled()) {
+        while (pagesHit < mlinksMaximum && !isCancelled()) {
             //while the links hit counter is below the max, and when collectedLinks isn't empty
 
             //clean links, then make iterator for the collectedLinks arraylist
             Iterator<URL> iterator = collectedLinks.iterator();
 
             if (iterator.hasNext()) {
-                URL nextUrl = iterator.next();
+                URL thisUrl = iterator.next();
                 //for each URL in collectedLinks array
                 //try a fetch using latest URL if visitedLinks does NOT contain this object
                 try {
                     //sleep to prevent server from kicking off ip
                     sleepMilliseconds(5000);
-                    Log.v("DLasync.doinBG", " now attempting fetch of: " + nextUrl.toString());
+                    Log.v("DLasync.doinBG", " now attempting fetch of: " + thisUrl.toString());
 
                     //send update before and after fetch is executed
 
-                    sendUpdate("Attempting URL " + linksHit + " from pull... ", "", "");
+                    sendUpdate("Attempting iteration " + pagesHit + " from pull... ", "", "");
 
-                    lastResult = fetch(nextUrl);
+                    lastResult = fetch(thisUrl);
 
-                    sendUpdate("Extracting data from " + nextUrl + "...", lastResult, nextUrl.toString() + "\n");
+                    sendUpdate("Extracting data from " + thisUrl + "...", lastResult, thisUrl.toString() + "\n");
 
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
-                if (lastResult != null) {
+                if (lastResult != null && !lastResult.equals("")) {
+                    //if last result wasn't faulty
 
                     //add to the bucket, increment counter
-                    linksHit++;
+                    pagesHit++;
                     bucket = bucket.concat(lastResult);
-                    visitedLinks.add(nextUrl);
-                    collectedLinks.remove(nextUrl);
+                    visitedLinks.add(thisUrl);
+                    collectedLinks.remove(thisUrl);
 
-                    Log.v("downloadAsyncTask", "visited links is now:" + linksHit);
-                    Log.v("the url ", "I just fetched was: " + nextUrl.toString());
+                    Log.v("downloadAsyncTask", "visited links is now:" + pagesHit);
+                    Log.v("the url ", "I just fetched: " + thisUrl.toString());
                     Log.v("the result", "was: " + lastResult);
                     Log.v("visited url array:", " " + visitedLinks);
                     Log.v("collected url array:", " " + collectedLinks);
 
+                } else {
+                    //the fetch was not fruitful so don't do pagesHit++, but we've visited this link. remove from collected
+                    visitedLinks.add(thisUrl);
+                    collectedLinks.remove(thisUrl);
                 }
 
             } else {
                 pullLinks(bucket);
-                Log.v("DLasync", " WE RAN OUT OF URLs, FETCHING MORE");
+                Log.v("DLasync", " WE RAN OUT OF URLS, FETCHING MORE");
             }
 
         }
