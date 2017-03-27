@@ -43,26 +43,44 @@
 
     </LinearLayout>
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/progressBar"
         android:visibility="gone"
-        android:layout_margin="20dp"
-        android:gravity="center"
-        android:orientation="vertical">
+        android:layout_margin="10dp">
     <ProgressBar
+        android:id="@+id/ProgressCircle"
         android:layout_width="50dp"
-        android:layout_height="50dp"/>
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:layout_marginBottom="40dp"/>
+
+        <ProgressBar
+            android:id="@+id/innerProgressCircle"
+            android:rotation="180"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_centerInParent="true"/>
+
         <TextView
             android:id="@+id/progressText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAlignment="center"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="30dp"
+            android:layout_below="@id/ProgressCircle"
             android:text="Sending query..."/>
 
-    </LinearLayout>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="33dp"
+            android:text="Kill Task"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/progressText"
+            android:onClick="killTask"/>
+
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/topWords"
@@ -88,7 +106,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
                 android:layout_weight="1"
-                android:text="http://www.example.com"
+                android:text="--end--"
                 android:textColor="#0000ff"
                 android:textStyle="bold" />
 

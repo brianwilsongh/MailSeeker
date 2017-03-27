@@ -41,7 +41,7 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
     private String[] updateArray = new String[3];
 
     //max links to hit
-    private int linksMaximum;
+    private int mlinksMaximum;
 
     //bucket string for holding the full html
     String bucket = "";
@@ -53,15 +53,15 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
     //first link visited
     private String firstLinkAsString = "";
 
-    public DownloadAsyncTask(FetchCallback listener) {
+    public DownloadAsyncTask(FetchCallback listener, int linksMaximum) {
         this.listener = listener;
+        mlinksMaximum = linksMaximum;
     }
 
     @Override
     protected void onPreExecute() {
         //before executing the download, do the following
         super.onPreExecute();
-        linksMaximum = 4;
 
     }
 
@@ -99,7 +99,7 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
         Log.v("DLAsync", " completed INITIAL pull of links from first query");
         cleanCollectedUrls();
 
-        while (linksHit < linksMaximum) {
+        while (linksHit < mlinksMaximum && !isCancelled()) {
             //while the links hit counter is below the max, and when collectedLinks isn't empty
 
             //clean links, then make iterator for the collectedLinks arraylist
@@ -116,7 +116,7 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
 
                     //send update before and after fetch is executed
 
-                    sendUpdate("Attempting next URL... " + nextUrl.toString(), "", "");
+                    sendUpdate("Attempting URL " + linksHit + " from pull... ", "", "");
 
                     lastResult = fetch(nextUrl);
 
@@ -182,7 +182,7 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
             if (url.getProtocol().equals("http")) {
                 connection = (HttpURLConnection) url.openConnection();
                 //set the timeout values
-                connection.setReadTimeout(3000 * linksMaximum);
+                connection.setReadTimeout(3000 * mlinksMaximum);
                 connection.setConnectTimeout(5000);
                 //set the request method, because we are gonna GET
                 connection.setRequestMethod("GET");
@@ -198,7 +198,7 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
             if (url.getProtocol().equals("https")) {
                 //do all the stuff for https here separately for now because of casting issues
                 secureConnection = (HttpsURLConnection) url.openConnection();
-                secureConnection.setReadTimeout(3000 * linksMaximum);
+                secureConnection.setReadTimeout(3000 * mlinksMaximum);
                 secureConnection.setConnectTimeout(5000);
                 secureConnection.setRequestMethod("GET");
                 secureConnection.connect();

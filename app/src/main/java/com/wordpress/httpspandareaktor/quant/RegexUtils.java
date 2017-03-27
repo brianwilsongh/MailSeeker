@@ -60,7 +60,9 @@ public class RegexUtils {
                 "about", "us", "if", "about", "find", "but", "out", "we", "all", "after", "before",
         "say", "says", "new", "what", "over", "lol", "just", "being", "was", "has", "still", "who", "into",
          "me", "they", "go", "hi", "can", "my", "welcome", "something", "it", "there", "around", "used", "something",
-        "some", "around", "so", "up", "every", "them", "same", "need", "such", "also", "were", "which"};
+        "some", "around", "so", "up", "every", "them", "same", "need", "such", "also", "were", "which", "between", "than",
+         "when", "through", "could", "other", "made", "been", "very", "would", "since", "thus", "later", "much",
+         "another", "although", "while", "usually", "make", "only", "good", "get", "even", "now"};
 
         if (Arrays.asList(monthStrings).contains(word)){
             return false;

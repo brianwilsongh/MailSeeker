@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
     String absoluteURL;
 
     //the progress bar that starts invisible but is b
-    LinearLayout progressBar;
+    RelativeLayout progressBar;
     //text below progress bar
     TextView progressText;
 
@@ -60,7 +61,10 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
     boolean filterMonths;
     boolean filterDays;
     boolean filterCommon;
-    static String maxLinesScrape;
+    static String linksMaximum;
+
+    //create a pointer to control each asynctask if needed
+    DownloadAsyncTask currentAsyncTask;
 
 
     @Override
@@ -72,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
         dataFeed = (TextView) findViewById(R.id.dataFeed);
         inputURL = (EditText) findViewById(R.id.inputURL);
         inputURL.setTextIsSelectable(true);
-        progressBar = (LinearLayout) findViewById(R.id.progressBar);
+        progressBar = (RelativeLayout) findViewById(R.id.progressBar);
         progressText = (TextView) findViewById(R.id.progressText);
         topWords = (TextView) findViewById(R.id.topWords);
         urlsDiscovered = (TextView) findViewById(R.id.urlsDiscovered);
@@ -92,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
         filterMonths = prefs.getBoolean("filter_months", true);
         filterDays = prefs.getBoolean("filter_days", true);
         filterCommon = prefs.getBoolean("filter_common", true);
-        maxLinesScrape = prefs.getString("seeker_maxPages", "1");
+        linksMaximum = prefs.getString("seeker_maxPages", "1");
     }
 
     @Override
@@ -126,8 +130,10 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
 
                 //if currently not running, execute the DownloadAsyncTask
                 if (!currentlyRunning) {
-                    //if the currentlyRunning boolean says there are no current tasks going, make a new one
-                    DownloadAsyncTask mDownloadAsyncTask = new DownloadAsyncTask(this);
+                    //if the currentlyRunning boolean says there are no current tasks going, make a new one and reference it
+                    DownloadAsyncTask mDownloadAsyncTask = new DownloadAsyncTask(this, Integer.valueOf(linksMaximum));
+                    currentAsyncTask = mDownloadAsyncTask;
+                    Log.v("MActivity.extractButton", " new AsyncTask created, max links value of: " + linksMaximum);
 
                     //new task created so set boolean to true
                     currentlyRunning = true;
@@ -173,6 +179,15 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
             urlsHit.setText(newUrls);
         }
 
+    }
+
+    public void killTask(View view) {
+        //user wants to kill the AsyncTask
+        if (currentlyRunning) {
+            currentAsyncTask.cancel(true);
+            progressBar.setVisibility(View.GONE);
+            currentlyRunning = false;
+        }
     }
 
     @Override
