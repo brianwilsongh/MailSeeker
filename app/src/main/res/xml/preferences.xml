@@ -34,8 +34,14 @@
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="filter_common"
-            android:summary="Ignore very frequent words like 'the' and 'site'"
+            android:summary="Ignore very frequent words like 'the' and 'for'"
             android:title="Common" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="filter_internet_common"
+            android:summary="Ignore words that appear very frequently on the internet like 'account' and 'site'"
+            android:title="Common Internet" />
 
     </PreferenceCategory>
 

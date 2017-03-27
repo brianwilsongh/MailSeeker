@@ -116,11 +116,11 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
 
                     //send update before and after fetch is executed
 
-                    sendUpdate("Attempting iteration " + pagesHit + " from pull... ", "", "");
+                    sendUpdate("Attempting iteration " + pagesHit + " from pull list... ", "", "");
 
                     lastResult = fetch(thisUrl);
 
-                    sendUpdate("Extracting data from " + thisUrl + "...", lastResult, thisUrl.toString() + "\n");
+                    sendUpdate("Extracting data from : " + thisUrl + "...", lastResult, thisUrl.toString() + "\n");
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -148,8 +148,10 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
                 }
 
             } else {
+                //TODO: find a way to deal with not enough links gracefully
                 pullLinks(bucket);
                 Log.v("DLasync", " WE RAN OUT OF URLS, FETCHING MORE");
+                pagesHit++;
             }
 
         }

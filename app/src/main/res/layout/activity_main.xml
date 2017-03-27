@@ -74,7 +74,8 @@
 
         <Button
             android:layout_width="wrap_content"
-            android:layout_height="33dp"
+            android:layout_height="wrap_content"
+            android:alpha="0.6"
             android:text="Kill Task"
             android:layout_centerHorizontal="true"
             android:layout_below="@id/progressText"

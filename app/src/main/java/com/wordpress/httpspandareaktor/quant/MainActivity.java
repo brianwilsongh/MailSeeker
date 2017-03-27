@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
     boolean filterMonths;
     boolean filterDays;
     boolean filterCommon;
+    boolean filterInternetCommon;
     static String linksMaximum;
 
     //create a pointer to control each asynctask if needed
@@ -96,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
         filterMonths = prefs.getBoolean("filter_months", true);
         filterDays = prefs.getBoolean("filter_days", true);
         filterCommon = prefs.getBoolean("filter_common", true);
+        filterInternetCommon = prefs.getBoolean("filter_internet_common", true);
         linksMaximum = prefs.getString("seeker_maxPages", "1");
     }
 
@@ -218,7 +220,7 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
 
             urlsDiscovered.setText(urlsFound.toString());
 
-            s = RegexUtils.cleanText(doc.body().text(), filterMonths, filterDays, filterCommon);
+            s = RegexUtils.cleanText(doc.body().text(), filterMonths, filterDays, filterCommon, filterInternetCommon);
 
 
             //set the desired text in the box
