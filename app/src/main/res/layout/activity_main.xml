@@ -43,20 +43,33 @@
 
     </LinearLayout>
 
-    <ProgressBar
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:id="@+id/progressBar"
+        android:visibility="gone"
+        android:layout_margin="20dp"
+        android:gravity="center"
+        android:orientation="vertical">
+    <ProgressBar
         android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_gravity="center"
-        android:layout_margin="50dp"
-        android:visibility="gone" />
+        android:layout_height="50dp"/>
+        <TextView
+            android:id="@+id/progressText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:layout_marginTop="10dp"
+            android:text="Sending query..."/>
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/topWords"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
-        android:maxLines="3"
+        android:maxLines="4"
         android:textColor="@color/colorAccent"
         android:visibility="gone" />
 
@@ -65,26 +78,43 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-    <TextView
-        android:id="@+id/urlsDiscovered"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="http://www.example.com"
-        android:layout_margin="10dp"
-        android:textStyle="bold"
-        android:textColor="#0000ff"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/urlsDiscovered"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:layout_weight="1"
+                android:text="http://www.example.com"
+                android:textColor="#0000ff"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/urlsHit"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="5dp"
+                android:text="--end--"
+                android:textColor="#FF0000"/>
+
+        </LinearLayout>
 
     </ScrollView>
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-    <TextView
-        android:id="@+id/dataFeed"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="uwotm8" />
+        <TextView
+            android:id="@+id/dataFeed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="uwotm8" />
 
     </ScrollView>
 

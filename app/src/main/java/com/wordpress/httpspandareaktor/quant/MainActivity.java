@@ -14,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,13 +41,17 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
 
     //this textiew shows the urls found on the page, we will crawl later
     TextView urlsDiscovered;
+    //urls hit
+    TextView urlsHit;
 
     //this EditText is where the user's URL input goes, absolute URL is set to domain name
     EditText inputURL;
     String absoluteURL;
 
     //the progress bar that starts invisible but is b
-    ProgressBar progressBar;
+    LinearLayout progressBar;
+    //text below progress bar
+    TextView progressText;
 
     //is the AsyncTask currently running?
     boolean currentlyRunning;
@@ -67,9 +72,11 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
         dataFeed = (TextView) findViewById(R.id.dataFeed);
         inputURL = (EditText) findViewById(R.id.inputURL);
         inputURL.setTextIsSelectable(true);
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        progressBar = (LinearLayout) findViewById(R.id.progressBar);
+        progressText = (TextView) findViewById(R.id.progressText);
         topWords = (TextView) findViewById(R.id.topWords);
         urlsDiscovered = (TextView) findViewById(R.id.urlsDiscovered);
+        urlsHit = (TextView) findViewById(R.id.urlsHit);
 
         //AsyncTask currently NOT running, thus:
         currentlyRunning = false;
@@ -117,11 +124,12 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
                 //if not empty, try to build URL, makeURL shoudld catch MalformedURLException
                 URL currentURL = NetworkUtils.makeURL(inputURL.getText().toString());
 
-                //if good to go, make a new AsyncTask, if no others are running make a new instance and execute
-                DownloadAsyncTask mDownloadAsyncTask = new DownloadAsyncTask(this);
-
                 //if currently not running, execute the DownloadAsyncTask
                 if (!currentlyRunning) {
+                    //if the currentlyRunning boolean says there are no current tasks going, make a new one
+                    DownloadAsyncTask mDownloadAsyncTask = new DownloadAsyncTask(this);
+
+                    //new task created so set boolean to true
                     currentlyRunning = true;
                     progressBar.setVisibility(View.VISIBLE);
 
@@ -143,6 +151,28 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
 
     public void clearURL(View view) {
         inputURL.setText("");
+    }
+
+    @Override
+    public void onUpdate(String[] s) {
+        //update the UI elements (progress text, html data textview, and urls hit textview respectively)
+        Log.v("Main.onUpdate", " updateArray is: " + s[0] + s[1] + s[2]);
+
+        String newLoadingText = s[0];
+        if (s[0] != null) {
+            progressText.setText(newLoadingText);
+        }
+
+        String newDatafeedText = s[1] + dataFeed.getText();
+        if (s[1] != null) {
+            dataFeed.setText(newDatafeedText);
+        }
+
+        String newUrls = s[2] + urlsHit.getText();
+        if (s[2] != null) {
+            urlsHit.setText(newUrls);
+        }
+
     }
 
     @Override

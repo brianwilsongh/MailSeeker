@@ -21,6 +21,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
@@ -30,24 +31,27 @@ import javax.net.ssl.HttpsURLConnection;
  * Created by brian on 3/20/17.
  */
 
-public class DownloadAsyncTask extends AsyncTask<URL, Void, String> {
+public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
 
     //create instance of listener interface
     private FetchCallback listener;
     URL currentURL;
 
+    //String array for onProgressUpdate
+    private String[] updateArray = new String[3];
+
     //max links to hit
-    int linksMaximum;
+    private int linksMaximum;
 
     //bucket string for holding the full html
     String bucket = "";
 
     //arraylists to store visited and unvisited urls
-    public ArrayList<URL> visitedLinks = new ArrayList<>();
-    public ArrayList<URL> collectedLinks = new ArrayList<>();
+    private HashSet<URL> visitedLinks = new HashSet<>();
+    private HashSet<URL> collectedLinks = new HashSet<>();
 
     //first link visited
-    String firstLinkAsString = "";
+    private String firstLinkAsString = "";
 
     public DownloadAsyncTask(FetchCallback listener) {
         this.listener = listener;
@@ -57,19 +61,23 @@ public class DownloadAsyncTask extends AsyncTask<URL, Void, String> {
     protected void onPreExecute() {
         //before executing the download, do the following
         super.onPreExecute();
-        linksMaximum = 3;
+        linksMaximum = 4;
 
     }
 
     @Override
     protected String doInBackground(URL... urls) {
         //main task to do
+        publishProgress("Initialize request...", " at URL: " + urls[0]);
 
+        //lastResult is the most recent webpage pulled from domain
         String lastResult = "";
+
+
         int linksHit = 0;
         firstLinkAsString = urls[0].toString();
 
-        //first fetch is unique and sets up a few things
+        //first fetch is unique and sets up a few things or the other iterations
         try {
             lastResult = fetch(urls[0]);
         } catch (IOException e) {
@@ -78,21 +86,23 @@ public class DownloadAsyncTask extends AsyncTask<URL, Void, String> {
 
         //add the lastest url to visited URLs arraylist, increment links hit counter, add to bucket
         visitedLinks.add(urls[0]);
-        linksHit++;
-        if (lastResult != "") {
+        Log.v("DLAsync", " add to visitedLinks set: " + urls[0]);
+        linksHit ++;
+        if (!lastResult.equals("")) {
             bucket = bucket.concat(lastResult);
+        } else {
+            return "First query returned nothing!";
         }
-        Log.v("iterationOne", " added to visitedLinks --: " + visitedLinks.get(0).toString());
 
-        //pull links and sort them based on visited or unvisited
+        //pull first round of links and sort them based on visited or unvisited
         pullLinks(lastResult);
-        cleanLinks();
+        Log.v("DLAsync", " completed INITIAL pull of links from first query");
+        cleanCollectedUrls();
 
-        while (linksHit < linksMaximum && collectedLinks.size() > 0) {
+        while (linksHit < linksMaximum) {
             //while the links hit counter is below the max, and when collectedLinks isn't empty
 
             //clean links, then make iterator for the collectedLinks arraylist
-            cleanLinks();
             Iterator<URL> iterator = collectedLinks.iterator();
 
             if (iterator.hasNext()) {
@@ -100,8 +110,18 @@ public class DownloadAsyncTask extends AsyncTask<URL, Void, String> {
                 //for each URL in collectedLinks array
                 //try a fetch using latest URL if visitedLinks does NOT contain this object
                 try {
-                    Log.v("DLasync.doinBG", " will attempt recursive fetch of: " + nextUrl.toString());
+                    //sleep to prevent server from kicking off ip
+                    sleepMilliseconds(5000);
+                    Log.v("DLasync.doinBG", " now attempting fetch of: " + nextUrl.toString());
+
+                    //send update before and after fetch is executed
+
+                    sendUpdate("Attempting next URL... " + nextUrl.toString(), "", "");
+
                     lastResult = fetch(nextUrl);
+
+                    sendUpdate("Extracting data from " + nextUrl + "...", lastResult, nextUrl.toString() + "\n");
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -133,9 +153,10 @@ public class DownloadAsyncTask extends AsyncTask<URL, Void, String> {
     }
 
     @Override
-    protected void onProgressUpdate(Void... values) {
-        //not necessary for now as it is void
-        super.onProgressUpdate(values);
+    protected void onProgressUpdate(String... values) {
+        //send info back to main so user can know data is coming in
+        listener.onUpdate(updateArray);
+
     }
 
     @Override
@@ -154,7 +175,7 @@ public class DownloadAsyncTask extends AsyncTask<URL, Void, String> {
         InputStream stream = null;
         HttpURLConnection connection = null;
         HttpsURLConnection secureConnection = null;
-        String finalResult = null;
+        String finalResult = "";
 
         try {
             // open connections for URL object based on http or https
@@ -162,7 +183,7 @@ public class DownloadAsyncTask extends AsyncTask<URL, Void, String> {
                 connection = (HttpURLConnection) url.openConnection();
                 //set the timeout values
                 connection.setReadTimeout(3000 * linksMaximum);
-                connection.setConnectTimeout(3000);
+                connection.setConnectTimeout(5000);
                 //set the request method, because we are gonna GET
                 connection.setRequestMethod("GET");
                 connection.connect();
@@ -178,7 +199,7 @@ public class DownloadAsyncTask extends AsyncTask<URL, Void, String> {
                 //do all the stuff for https here separately for now because of casting issues
                 secureConnection = (HttpsURLConnection) url.openConnection();
                 secureConnection.setReadTimeout(3000 * linksMaximum);
-                secureConnection.setConnectTimeout(3000);
+                secureConnection.setConnectTimeout(5000);
                 secureConnection.setRequestMethod("GET");
                 secureConnection.connect();
 
@@ -217,38 +238,34 @@ public class DownloadAsyncTask extends AsyncTask<URL, Void, String> {
 
             String possibleUrl = link.attr("abs:href");
 
-            if (!possibleUrl.equals("") && (collectedLinks.size() + visitedLinks.size() < linksMaximum)) {
-                //if the link attr isn't empty, and links size + collected is less than max
+            if (!possibleUrl.equals("")) {
+                //if the link attr isn't empty, make a URL
                 URL theUrl = NetworkUtils.makeURL(possibleUrl);
-                Log.v("pullLinks", "made URL: " + theUrl.toString());
+                Log.v("DLAsync.pullLinks", " created URL from page: " + theUrl.toString());
+                Log.v(".pullLink collect-visit", " HashSet contents = " + collectedLinks + " " + visitedLinks);
 
                 if (RegexUtils.urlDomainNameMatch(firstLinkAsString, theUrl.toString())) {
-                    //if the url is within the same domain
-                    if (!urlInArrayList(theUrl, visitedLinks)) {
-                        Log.v("DLAsyncTask", " pull thinks that " + theUrl.toString() + " wasn't visited, so adding...");
+                    //if the url is within the same domain as original query
+                    if (!visitedLinks.contains(theUrl)) {
+                        Log.v("DLAsyncTask.pullLinks", " thinks that " + theUrl.toString() + " wasn't visited, add into collected...");
                         collectedLinks.add(theUrl);
                     }
-
                     Log.v("DlAsyncTask.pull", " the collected links array is now:" + collectedLinks.toString());
                     Log.v("DlAsyncTask.pull", " the visited links array is now:" + visitedLinks.toString());
-                    cleanLinks();
                 }
             }
 
         }
-
-        cleanLinks();
     }
 
-    private void cleanLinks() {
-        //iterator to go over and clean out collectedLinks
-        //TODO: find a more efficient way to do this
+    private void cleanCollectedUrls() {
+        //iterator to go over and clean out collectedLinks HashSet
         for (Iterator itr = visitedLinks.iterator(); itr.hasNext(); ) {
-            URL nowUrl = (URL) itr.next();
-            if (urlInArrayList(nowUrl, collectedLinks)) {
-                itr.remove();
-                Log.v("DLasyncTask", "Just cleaned: " + nowUrl);
-                Log.v("collectedLinks", " is now:" + collectedLinks.toString());
+            URL thisURL = (URL) itr.next();
+            if (urlInHashSet(thisURL, collectedLinks)) {
+                collectedLinks.remove(thisURL);
+                Log.v("DLasync.cleanCollected", " from CollectedLinks, just cleaned: " + thisURL);
+                Log.v(".cleanCollected", " collected set is now:" + collectedLinks.toString());
             }
         }
 
@@ -274,26 +291,37 @@ public class DownloadAsyncTask extends AsyncTask<URL, Void, String> {
     }
 
 
-    private void sleepSeconds(int time) {
-        //try sleeping for 2 seconds...
+    private void sleepMilliseconds(int time) {
+        //try sleeping randomly up to time milliseconds
+        int multipliedParam = (int) (Math.random() * time + 1);
+
         try {
-            TimeUnit.SECONDS.sleep(time);
+            TimeUnit.MILLISECONDS.sleep(multipliedParam);
+            Log.v("DLASync.sleep", " sleep " + multipliedParam + " milliseconds...");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-    private boolean urlInArrayList(URL url, ArrayList<URL> list){
+    private boolean urlInHashSet(URL url, HashSet<URL> set){
         boolean returnBoolean = false;
 
-        for (URL listedUrl : list){
-            Log.v("urlInArrayList", " checking list item " + listedUrl.toString() + " to test url " + url.toString());
-            if (NetworkUtils.urlPathMatch(listedUrl, url)) {
+        for (URL setItem : set){
+            Log.v("DLAsync.urlInHashSet", " checking new potential set item " + url.toString() + " equivalency to this existing HashSet url: " + setItem.toString());
+            if (NetworkUtils.urlAuthPathMatch(setItem, url)) {
                 returnBoolean = true;
             }
         }
-        Log.v("urlInArrayList says:", " no " + url.toString() + " in " + list.toString());
+        Log.v("DLAsync.urlInHashSet", " found no " + url.toString() + " in " + set.toString());
         return returnBoolean;
+    }
+
+    private void sendUpdate(String progressText, String dataText, String lastUrl){
+        //builds an update array to send to onProgressUpdate by calling publishProgress
+        updateArray[0] = progressText;
+        updateArray[1] = dataText;
+        updateArray[2] = lastUrl;
+        publishProgress(updateArray);
     }
 
 

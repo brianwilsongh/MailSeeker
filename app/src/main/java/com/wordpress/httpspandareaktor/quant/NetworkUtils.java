@@ -12,9 +12,18 @@ import java.net.URL;
 public class NetworkUtils {
 
     public static URL makeURL(String string) {
+
+        //remove the trailing slash if there is one, for uniformity's sake
+        if (string.endsWith("/")){
+            string = string.substring(0, string.length() - 1);
+        }
+
         URL returnURL = null;
+
         try {
+            //make the URL out of the string
             returnURL = new URL(string);
+
         } catch (MalformedURLException e) {
             e.printStackTrace();
             Log.v("NetworkUtils", " I failed to make url from: " + string);
@@ -22,13 +31,34 @@ public class NetworkUtils {
         return returnURL;
     }
 
-    public static boolean urlPathMatch(URL urlA, URL urlB) {
+    public static boolean urlAuthPathMatch(URL urlA, URL urlB) {
         //check if the paths match of built URL objects
 
         //build a url to make string for A, then B
+
+        String protocolA = urlA.getProtocol();
+        String protocolB = urlB.getProtocol();
+
+        String hostA = urlA.getHost();
+        String hostB = urlB.getHost();
+        //strip the www. out of the host A/B if it exists
+        if (hostA.substring(0, 4).equals("www.")){
+            hostA = hostA.substring(4, hostA.length());
+        }
+        if (hostB.substring(0, 4).equals("www.")){
+            hostB = hostB.substring(4, hostB.length());
+        }
+
         String pathA = urlA.getPath();
         String pathB = urlB.getPath();
-        return pathA.equals(pathB);
+
+        String rebuiltUrlA = protocolA + hostA + pathA;
+
+        if (rebuiltUrlA.equals(protocolB + hostB + pathB)){
+            return true;
+        } else {
+            return false;
+        }
 
     }
 
