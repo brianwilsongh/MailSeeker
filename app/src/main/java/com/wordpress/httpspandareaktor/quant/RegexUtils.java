@@ -64,13 +64,13 @@ public class RegexUtils {
          "when", "through", "could", "other", "made", "been", "very", "would", "since", "thus", "later", "much",
          "another", "although", "while", "usually", "make", "only", "good", "get", "even", "now", "must", "asked", "page",
          "wow", "here", "big", "small", "one", "two", "three", "four", "five", "next", "see", "over", "under", "take",
-         "top", "bottom"};
+         "top", "bottom", "it", "well", "most", "no"};
 
         String[] internetCommon = new String[]{"blog", "blogs", "comment", "comments", "click", "feedback", "account",
-        "browser", "password", "video", "audio", "download", "facebook", "twitter", "google", "apple", "wordpress",
+        "browser", "password", "video", "audio", "download", "facebook", "twitter", "google", "apple", "youtube", "wordpress",
                 "pinterest", "drupal", "archives", "cookies", "search", "subscribe", "subscription", "terms", "privacy", "settings",
                 "home", "mobile", "contact", "email", "rss", "share", "pics", "pictures", "image", "followers", "follow",
-        "web", "log", "html", "css", "javascript"};
+        "web", "log", "html", "css", "javascript", "app", "submit"};
 
         if (Arrays.asList(monthStrings).contains(word)){
             return false;

@@ -311,15 +311,15 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
     }
 
     private boolean urlInHashSet(URL url, HashSet<URL> set){
+        //checks if the URL is in a provided HashSet with an improved for loop
         boolean returnBoolean = false;
 
         for (URL setItem : set){
-            Log.v("DLAsync.urlInHashSet", " checking new potential set item " + url.toString() + " equivalency to this existing HashSet url: " + setItem.toString());
-            if (NetworkUtils.urlAuthPathMatch(setItem, url)) {
+            if (NetworkUtils.urlHostPathMatch(setItem, url)) {
+                Log.v("DLAsync.urlInHashSet", " just found " + url.toString() + " in " + set.toString());
                 returnBoolean = true;
             }
         }
-        Log.v("DLAsync.urlInHashSet", " found no " + url.toString() + " in " + set.toString());
         return returnBoolean;
     }
 

@@ -18,6 +18,13 @@ public class NetworkUtils {
             string = string.substring(0, string.length() - 1);
         }
 
+        if (!string.startsWith("http")){
+            //if the user forgot to put in the protocol, guess http and put it in
+            //TODO: find a way to see if the real URL is http or https and append the correct one
+            string = "http://" + string;
+            Log.v("NetworkUtils.makeURl", " appended (guessed) http:// protocol to make " + string);
+        }
+
         URL returnURL = null;
 
         try {
@@ -31,7 +38,7 @@ public class NetworkUtils {
         return returnURL;
     }
 
-    public static boolean urlAuthPathMatch(URL urlA, URL urlB) {
+    public static boolean urlHostPathMatch(URL urlA, URL urlB) {
         //check if the paths match of built URL objects
 
         //build a url to make string for A, then B

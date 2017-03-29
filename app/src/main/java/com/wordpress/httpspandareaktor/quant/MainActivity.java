@@ -45,9 +45,9 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
     //urls hit
     TextView urlsHit;
 
-    //this EditText is where the user's URL input goes, absolute URL is set to domain name
+    //this EditText is where the user's URL input goes, queried URL is another store (created URL) of the input
     EditText inputURL;
-    String absoluteURL;
+    URL queriedURL;
 
     //the progress bar that starts invisible but is b
     RelativeLayout progressBar;
@@ -126,28 +126,32 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
 
         //User just typed in a URL and requested fetch
         if (networkAvailable()) {
-            if (inputURL.getText().toString() != "") {
+            if (inputURL.getText().toString() != "" && inputURL.getText().toString() != null) {
                 //if not empty, try to build URL, makeURL shoudld catch MalformedURLException
                 URL currentURL = NetworkUtils.makeURL(inputURL.getText().toString());
 
                 //if currently not running, execute the DownloadAsyncTask
                 if (!currentlyRunning) {
-                    //if the currentlyRunning boolean says there are no current tasks going, make a new one and reference it
-                    DownloadAsyncTask mDownloadAsyncTask = new DownloadAsyncTask(this, Integer.valueOf(linksMaximum));
-                    currentAsyncTask = mDownloadAsyncTask;
-                    Log.v("MActivity.extractButton", " new AsyncTask created, max links value of: " + linksMaximum);
+                    if (!(currentURL == null)) {
+                        //if the currentlyRunning boolean says there are no current tasks going, make a new one and reference it
+                        DownloadAsyncTask mDownloadAsyncTask = new DownloadAsyncTask(this, Integer.valueOf(linksMaximum));
+                        currentAsyncTask = mDownloadAsyncTask;
+                        Log.v("MActivity.extractButton", " new AsyncTask created, max links value of: " + linksMaximum);
 
-                    //new task created so set boolean to true
-                    currentlyRunning = true;
-                    progressBar.setVisibility(View.VISIBLE);
+                        //new task created so set boolean to true
+                        currentlyRunning = true;
+                        progressBar.setVisibility(View.VISIBLE);
 
-                    //store the url query as a string so we can do stuff with it later
-                    absoluteURL = inputURL.getText().toString();
+                        //store the url query as a string so we can do stuff with it later
+                        queriedURL = NetworkUtils.makeURL(inputURL.getText().toString());
 
-                    //execute the asyncTask
-                    mDownloadAsyncTask.execute(currentURL);
+                        //execute the asyncTask
+                        mDownloadAsyncTask.execute(currentURL);
+                    } else {
+                        Toast.makeText(this, "Bad URL! Try again", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
-                    Toast.makeText(this, "Wait until the current task is finished!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Cannot do two tasks at once!", Toast.LENGTH_SHORT).show();
                 }
             } else {
                 Toast.makeText(this, "Cannot extract from an empty URL!", Toast.LENGTH_SHORT).show();
@@ -205,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
 
             for (Element link : links) {
                 if (link.attr("abs:href") != "") {
-                    if (RegexUtils.urlDomainNameMatch(link.attr("abs:href"), absoluteURL)) {
+                    if (RegexUtils.urlDomainNameMatch(link.attr("abs:href"), queriedURL.toString())) {
                         urlsFound.append("INTERNAL: " + link.attr("abs:href"));
                         urlsFound.append("\n");
                         urlsFound.append("\n");
