@@ -39,7 +39,7 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
     //String array for onProgressUpdate
     private String[] updateArray = new String[3];
 
-    //max links to hit
+    //max links to hit, set by preferences menu
     private int mlinksMaximum;
 
     //bucket string for holding the full html
@@ -53,6 +53,8 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
     private String firstLinkAsString = "";
 
     public DownloadAsyncTask(FetchCallback listener, int linksMaximum) {
+        //set the declared FetchCallback named "listener" to the listener provided in constructor
+        //this links this DLAsyncTask to MainActivity, which is instance of FetchCallback interface
         this.listener = listener;
         mlinksMaximum = linksMaximum;
     }
@@ -71,6 +73,9 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
 
         //lastResult is the most recent webpage pulled from domain
         String lastResult = "";
+
+        //failedPullLinkCount is a counter to keep track of failure to pull enough URLs in while loop
+        int failedPullLinkCount = 0;
 
 
         int pagesHit = 0;
@@ -122,12 +127,20 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
 
                     sendUpdate("Extracting data from : " + thisUrl + "...", lastResult, thisUrl.toString() + "\n");
 
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
                 if (lastResult != null && !lastResult.equals("")) {
-                    //if last result wasn't faulty
+                    //if last result wasn't blank or null
+
+                    cleanCollectedUrls();
+                    //clean the collected list as we will check to see if there are more unvisited URLs
+                    if (collectedLinks.size() < 2){
+                        //if there are less than 2 links on the collected list, try pulling more
+                        pullLinks(lastResult);
+                    }
 
                     //add to the bucket, increment counter
                     pagesHit++;
@@ -148,13 +161,22 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
                 }
 
             } else {
-                //TODO: find a way to deal with not enough links gracefully
+                //If there are no collected URLs left, clean and try pull and add to failedPull incrementor
+                publishProgress("Ran out of links! Attempting to pull more", "", "");
+                cleanCollectedUrls();
                 pullLinks(bucket);
-                Log.v("DLasync", " WE RAN OUT OF URLS, FETCHING MORE");
-                pagesHit++;
+                failedPullLinkCount++;
+                Log.v("DLasync", " Ran out of URLs, tried to pull more... Try number " + failedPullLinkCount);
+                if (failedPullLinkCount == 3){
+                    //on third strike, you're out of the loop
+                    Log.v("DLAsync", " Totally out of URLs, crawling is finished!");
+                    break;
+                }
             }
 
-        }
+        } //END OF WHILE LOOP
+
+
         Log.v("DLasyncTask", " final list of visited:" + visitedLinks);
         return bucket;
     }
@@ -300,6 +322,7 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
 
     private void sleepMilliseconds(int time) {
         //try sleeping randomly up to time milliseconds
+        //prevent repeated suspicious activity from server
         int multipliedParam = (int) (Math.random() * time + 1);
 
         try {

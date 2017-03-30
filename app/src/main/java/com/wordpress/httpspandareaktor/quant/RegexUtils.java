@@ -26,15 +26,19 @@ public class RegexUtils {
         //include words with comma, period, exclaimation, apostrophe at start/fin, etc...
         for (String word : dirtyWordArray) {
             if (word.matches("[a-z[A-Z]]+") && !word.matches("null")){
+                //if the word is made up entirely of alphabet chars
                 if (passesFilter(word.toLowerCase(), filterMonth, filterDay, filterCommon, filterInternetCommon)) {
-                    cleanString.append(word + " ");
+                    cleanString.append(word);
+                    cleanString.append(" ");
                 }
 
 
-            } else if ((word.matches("[a-z[A-Z]]+\\!?") || word.matches("[a-zA-Z]+\\.?") || word.matches("[a-zA-Z]+\\??"))
+            } else if ((word.matches("[a-z[A-Z]]+\\!") || word.matches("[a-zA-Z]+\\.?") || word.matches("[a-zA-Z]+\\??"))
                     && !word.matches("null")){
+                //if the word is at the end of a sentence with a !, . or ? then...
                 if (passesFilter(word.toLowerCase(), filterMonth, filterDay, filterCommon, filterInternetCommon)) {
-                    cleanString.append(word.substring(0, word.length() - 1) + " ");
+                    cleanString.append(word.substring(0, word.length() - 1));
+                    cleanString.append(" ");
                 }
             } else {
                 cleanString.append("");
