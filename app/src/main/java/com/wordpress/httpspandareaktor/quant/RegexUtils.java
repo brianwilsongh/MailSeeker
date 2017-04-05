@@ -79,7 +79,7 @@ public class RegexUtils {
         "bar", "toolbar"};
 
         String[] geographyStrings = new String[]{"new", "york", "london", "paris", "berlin", "munich", "frankfurt", "stockholm",
-                "helinski", "oslo", "moscow", "beijing",
+                "helinski", "oslo", "moscow", "beijing", "seoul", "pyongyang", "kyoto",
                 "tokyo", "hong", "kong", "san", "francisco", "los", "angeles", "chicago", "dublin", "rome", "madrid", "warsaw",
                 "kiev", "instanbul", "cairo", "tehran", "baghdad", "riyadh", "shanghai", "mumbai", "bombay", "dehli", "bangkok", "singapore",
                 "taipei", "melborne", "sydney", "canberra", "vancouver", "ottawa", "montreal", "calgary", "mexico", "city", "rio", "buenos",
@@ -96,7 +96,7 @@ public class RegexUtils {
             return false;
         }
 
-        if (Arrays.asList(commonStrings).contains(word)) {
+        if (Arrays.asList(commonStrings).contains(word) || Arrays.asList(commonStrings).contains(word + "s")) {
             return false;
         }
 

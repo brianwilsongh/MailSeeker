@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
 
     //this EditText is what user put in as maximum limit for pages to crawl
     EditText maxPagesCrawl;
+    static int crawlMaximum = 1;
 
     //this TextView will display the data
     TextView dataFeed;
@@ -68,7 +69,6 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
     boolean filterCommon;
     boolean filterInternetCommon;
     boolean filterGeography;
-    static int crawlMaximum;
 
     //create a pointer to control each asynctask if needed
     DownloadAsyncTask currentAsyncTask;
@@ -131,11 +131,14 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
     }
 
     public void extractButton(View view) {
-        crawlMaximum = Integer.parseInt(maxPagesCrawl.getText().toString());
+        if (!maxPagesCrawl.getText().toString().equals("")){
+            //if the user didn't leave the maxPagesCrawl box blank, set the int
+            crawlMaximum = Integer.parseInt(maxPagesCrawl.getText().toString());
+        }
 
-        if (crawlMaximum > 50) {
+        if (crawlMaximum > 50 || crawlMaximum < 1) {
             //Error message for crawlMaximum if maximum is too big
-            Toast.makeText(this, String.format("Cannot crawl >50 pages with this version of %s!", R.string.app_name), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, String.format("%s can only crawl 1-50 pages, enter new value", R.string.app_name), Toast.LENGTH_LONG).show();
             return;
         }
 

@@ -1,5 +1,8 @@
 package com.wordpress.httpspandareaktor.quant;
 
+import android.os.Build;
+import android.text.Html;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.View;
 
@@ -22,7 +25,7 @@ public final class Abathur {
 
 private static int wordCount = 0;
 
-    public static String findFrequency(String str){
+    public static Spanned findFrequency(String str){
         HashMap<String, Integer> map = new HashMap<>();
         String[] wordsArray = str.split("\\s+");
 
@@ -41,7 +44,7 @@ private static int wordCount = 0;
 
         Log.v("Abathur", ": map before sort is" + map.toString());
 
-        return sortMapToString(map);
+        return fromHtml(sortMapToString(map));
     }
 
 
@@ -64,20 +67,31 @@ private static int wordCount = 0;
 
         for (HashMap.Entry<String, Integer> entry : entryList) {
             //get the word
-            returner.append(entry.getKey());
-            returner.append(" ");
+            returner.append("<font color=\"4623480\"><b>" + entry.getKey() + "</b></font>");
+            returner.append(" : ");
             //get the number of times the word appears
             returner.append(String.format("(count: %s)", entry.getValue()));
             double statFreq  = (double) (entry.getValue() * 100) / wordCount;
             //truncate the decimal by formatting it, rounding to ceiling for last digit
-            DecimalFormat decimalFormat = new DecimalFormat("##.###");
+            DecimalFormat decimalFormat = new DecimalFormat("##.####");
             decimalFormat.setRoundingMode(RoundingMode.CEILING);
-            returner.append(String.format(" (frequency: %s", decimalFormat.format(statFreq)));
+            returner.append(String.format(" , (frequency: %s", decimalFormat.format(statFreq)));
             returner.append("%)");
-            returner.append("\n");
+            returner.append("<br>");
         }
         Log.v("Abathur.sortMap", " made string " + returner.toString());
         return returner.toString();
         }
+
+
+    public static Spanned fromHtml(String theHtml) {
+        Spanned result;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            result = Html.fromHtml(theHtml, Html.FROM_HTML_MODE_LEGACY);
+        } else {
+            result = Html.fromHtml(theHtml);
+        }
+        return result;
+    }
 
 }
