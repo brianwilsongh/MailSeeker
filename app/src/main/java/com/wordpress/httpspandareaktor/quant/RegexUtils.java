@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 public class RegexUtils {
 
 
-    public static String cleanText(String input, boolean filterMonth, boolean filterDay, boolean filterCommon, boolean filterInternetCommon){
+    public static String cleanText(String input, boolean filterMonth, boolean filterDay, boolean filterCommon, boolean filterInternetCommon, boolean filterGeography) {
         //booleans are filters that take month, day, very common words like "a" and "the"
         //split input into array to clean using delimiter of unlimited whitespace to capture everything
         String[] dirtyWordArray = input.split("\\s+");
@@ -25,18 +25,18 @@ public class RegexUtils {
         //use enhanced for loop to clean out non-alpha
         //include words with comma, period, exclaimation, apostrophe at start/fin, etc...
         for (String word : dirtyWordArray) {
-            if (word.matches("[a-z[A-Z]]+") && !word.matches("null")){
+            if (word.matches("[a-z[A-Z]]+") && !word.matches("null")) {
                 //if the word is made up entirely of alphabet chars
-                if (passesFilter(word.toLowerCase(), filterMonth, filterDay, filterCommon, filterInternetCommon)) {
+                if (passesFilter(word.toLowerCase(), filterMonth, filterDay, filterCommon, filterInternetCommon, filterGeography)) {
                     cleanString.append(word);
                     cleanString.append(" ");
                 }
 
 
             } else if ((word.matches("[a-z[A-Z]]+\\!") || word.matches("[a-zA-Z]+\\.?") || word.matches("[a-zA-Z]+\\??"))
-                    && !word.matches("null")){
+                    && !word.matches("null")) {
                 //if the word is at the end of a sentence with a !, . or ? then...
-                if (passesFilter(word.toLowerCase(), filterMonth, filterDay, filterCommon, filterInternetCommon)) {
+                if (passesFilter(word.toLowerCase(), filterMonth, filterDay, filterCommon, filterInternetCommon, filterGeography)) {
                     cleanString.append(word.substring(0, word.length() - 1));
                     cleanString.append(" ");
                 }
@@ -50,45 +50,61 @@ public class RegexUtils {
     }
 
 
-    private static boolean passesFilter(String word, boolean filterMonth, boolean filterDay, boolean filterCommon, boolean filterInternetCommon){
+    private static boolean passesFilter(String word, boolean filterMonth, boolean filterDay, boolean filterCommon, boolean filterInternetCommon, boolean filterGeography) {
+        //TODO: make this section better, more robust
         String[] monthStrings = new String[]{"january", "february", "march", "april", "may", "june", "july",
                 "august", "september", "october", "november", "december", "jan", "feb", "mar", "apr", "may", "jun",
-        "jul", "aug", "sep", "oct", "nov", "dec"};
+                "jul", "aug", "sep", "oct", "nov", "dec"};
 
         String[] dayStrings = new String[]{"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"};
 
         String[] commonStrings = new String[]{"the", "be", "to", "of", "and", "a", "in", "that", "is",
                 "have", "i", "it", "its", "for", "not", "on", "with", "he", "she", "his", "her", "as", "you", "do", "at",
                 "or", "a", "an", "will", "their", "there", "by", "date",
-        "how", "from", "et", "more", "are", "your", "am", "pm", "site", "why", "where", "our", "this",
+                "how", "from", "et", "more", "are", "your", "am", "pm", "site", "why", "where", "our", "this",
                 "about", "us", "if", "about", "find", "but", "out", "we", "all", "after", "before",
-        "say", "says", "new", "what", "over", "lol", "just", "being", "was", "has", "still", "who", "into",
-         "me", "they", "go", "hi", "can", "my", "welcome", "something", "it", "there", "around", "used", "something",
-        "some", "around", "so", "up", "every", "them", "same", "need", "such", "also", "were", "which", "between", "than",
-         "when", "through", "could", "other", "made", "been", "very", "would", "since", "thus", "later", "much",
-         "another", "although", "while", "usually", "make", "only", "good", "get", "even", "now", "must", "asked", "page",
-         "wow", "here", "big", "small", "one", "two", "three", "four", "five", "next", "see", "over", "under", "take",
-         "top", "bottom", "it", "well", "most", "no"};
+                "say", "new", "what", "over", "lol", "just", "being", "was", "has", "still", "who", "into",
+                "me", "they", "go", "hi", "can", "my", "welcome", "something", "it", "there", "around", "used", "something",
+                "some", "around", "so", "up", "every", "them", "same", "need", "such", "also", "were", "which", "between", "than",
+                "when", "through", "could", "other", "made", "been", "very", "would", "since", "thus", "later", "much",
+                "another", "although", "while", "usually", "make", "only", "good", "get", "even", "now", "must", "asked", "page",
+                "wow", "here", "big", "small", "one", "two", "three", "four", "five", "next", "see", "over", "under", "take",
+                "top", "bottom", "it", "well", "most", "no", "had", "him", "least", "day", "world", "read", "little", "big", "nice"};
 
         String[] internetCommon = new String[]{"blog", "blogs", "comment", "comments", "click", "feedback", "account",
-        "browser", "password", "video", "audio", "download", "facebook", "twitter", "google", "apple", "youtube", "wordpress",
+                "browser", "password", "video", "audio", "download", "facebook", "twitter", "google", "apple", "youtube", "wordpress",
                 "pinterest", "drupal", "archives", "cookies", "search", "subscribe", "subscription", "terms", "privacy", "settings",
                 "home", "mobile", "contact", "email", "rss", "share", "pics", "pictures", "image", "followers", "follow",
-        "web", "log", "html", "css", "javascript", "app", "submit"};
+                "web", "log", "html", "css", "javascript", "app", "submit", "reply", "name", "sign", "account", "online", "navigation",
+        "bar", "toolbar"};
 
-        if (Arrays.asList(monthStrings).contains(word)){
+        String[] geographyStrings = new String[]{"new", "york", "london", "paris", "berlin", "munich", "frankfurt", "stockholm",
+                "helinski", "oslo", "moscow", "beijing",
+                "tokyo", "hong", "kong", "san", "francisco", "los", "angeles", "chicago", "dublin", "rome", "madrid", "warsaw",
+                "kiev", "instanbul", "cairo", "tehran", "baghdad", "riyadh", "shanghai", "mumbai", "bombay", "dehli", "bangkok", "singapore",
+                "taipei", "melborne", "sydney", "canberra", "vancouver", "ottawa", "montreal", "calgary", "mexico", "city", "rio", "buenos",
+                "aires", "damascus", "usa", "united", "states", "america", "uk", "kingdom", "france", "germany", "italy", "spain", "russia", "poland",
+        "sweden", "norway", "finland", "greece", "ukraine", "saudi", "arabia", "iran", "israel", "syria", "iraq", "india", "china", "japan",
+         "taiwan", "thailand", "canada", "australia", "mexico", "indonesia", "california", "brazil", "africa", "egypt", "ireland", "portugal",
+        "austria", "hungary", "romania", "turkey"};
+
+        if (Arrays.asList(monthStrings).contains(word)) {
             return false;
         }
 
-        if (Arrays.asList(dayStrings).contains(word)){
+        if (Arrays.asList(dayStrings).contains(word)) {
             return false;
         }
 
-        if (Arrays.asList(commonStrings).contains(word)){
+        if (Arrays.asList(commonStrings).contains(word)) {
             return false;
         }
 
-        if (Arrays.asList(internetCommon).contains(word)){
+        if (Arrays.asList(internetCommon).contains(word)) {
+            return false;
+        }
+
+        if (Arrays.asList(geographyStrings).contains(word)) {
             return false;
         }
         return true;
@@ -96,7 +112,7 @@ public class RegexUtils {
     }
 
 
-    public static boolean urlDomainNameMatch(String urlA, String urlB){
+    public static boolean urlDomainNameMatch(String urlA, String urlB) {
         //check if the host names of two urls match, regardless of www in front of them or not
         //this currently checks if the url pulled by Jsoup matches the base URL input by the user
 
@@ -119,14 +135,12 @@ public class RegexUtils {
         }
 
 
-
         //now extract substring from strings, domain name, to take care of www or not www in URLs
         String siteNameA = "";
         //search for the pattern I want, like "google.com" in http://www.google.com/maps using RegEx
         Pattern patternA = Pattern.compile("([^\\.]+)\\.(co.)?([^\\.]+)$");
         Matcher matcherA = patternA.matcher(hostA);
-        if (matcherA.find())
-        {
+        if (matcherA.find()) {
             siteNameA = matcherA.group();
         }
 
@@ -134,16 +148,13 @@ public class RegexUtils {
         //search for the pattern I want, like "google.com/" in http://www.google.com/maps
         Pattern patternB = Pattern.compile("([^\\.]+)\\.(co.)?([^\\.]+)$");
         Matcher matcherB = patternB.matcher(hostB);
-        if (matcherB.find())
-        {
+        if (matcherB.find()) {
             siteNameB = matcherB.group();
         }
 
         return siteNameA.equals(siteNameB);
 
     }
-
-
 
 
 }

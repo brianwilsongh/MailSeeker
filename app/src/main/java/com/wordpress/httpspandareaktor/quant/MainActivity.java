@@ -14,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -34,8 +35,12 @@ import java.util.prefs.Preferences;
 
 public class MainActivity extends AppCompatActivity implements FetchCallback {
 
+    //this EditText is what user put in as maximum limit for pages to crawl
+    EditText maxPagesCrawl;
+
     //this TextView will display the data
     TextView dataFeed;
+    FrameLayout dataFeedHolder;
 
     //this textview shows topwords, start as view.gone
     TextView topWords;
@@ -62,7 +67,8 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
     boolean filterDays;
     boolean filterCommon;
     boolean filterInternetCommon;
-    static String linksMaximum;
+    boolean filterGeography;
+    static int crawlMaximum;
 
     //create a pointer to control each asynctask if needed
     DownloadAsyncTask currentAsyncTask;
@@ -74,7 +80,9 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
         setContentView(R.layout.activity_main);
 
         //get references to the Views
+        maxPagesCrawl = (EditText) findViewById(R.id.maxPagesCrawl);
         dataFeed = (TextView) findViewById(R.id.dataFeed);
+        dataFeedHolder = (FrameLayout) findViewById(R.id.dataFeedHolder);
         inputURL = (EditText) findViewById(R.id.inputURL);
         inputURL.setTextIsSelectable(true);
         progressBar = (RelativeLayout) findViewById(R.id.progressBar);
@@ -98,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
         filterDays = prefs.getBoolean("filter_days", true);
         filterCommon = prefs.getBoolean("filter_common", true);
         filterInternetCommon = prefs.getBoolean("filter_internet_common", true);
-        linksMaximum = prefs.getString("seeker_maxPages", "1");
+        filterGeography = prefs.getBoolean("filter_geography", true);
     }
 
     @Override
@@ -123,41 +131,52 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
     }
 
     public void extractButton(View view) {
+        crawlMaximum = Integer.parseInt(maxPagesCrawl.getText().toString());
+
+        if (crawlMaximum > 50) {
+            //Error message for crawlMaximum if maximum is too big
+            Toast.makeText(this, String.format("Cannot crawl >50 pages with this version of %s!", R.string.app_name), Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        if (!networkAvailable()) {
+            //Error message if the network is unavailable
+            Toast.makeText(this, "Network unavailable!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (currentlyRunning) {
+            //Error message if there is another DLAsyncTask is already running
+            Toast.makeText(this, "Cannot do two tasks at once!", Toast.LENGTH_SHORT).show();
+        }
 
         //User just typed in a URL and requested fetch
-        if (networkAvailable()) {
-            if (inputURL.getText().toString() != "" && inputURL.getText().toString() != null) {
-                //if not empty, try to build URL, makeURL shoudld catch MalformedURLException
-                URL currentURL = NetworkUtils.makeURL(inputURL.getText().toString());
+        if (!inputURL.getText().toString().equals("")) {
+            //if not empty, try to build URL, makeURL shoudld catch MalformedURLException
+            URL currentURL = NetworkUtils.makeURL(inputURL.getText().toString());
 
-                //if currently not running, execute the DownloadAsyncTask
-                if (!currentlyRunning) {
-                    if (!(currentURL == null)) {
-                        //if the currentlyRunning boolean says there are no current tasks going, make a new one and reference it
-                        DownloadAsyncTask mDownloadAsyncTask = new DownloadAsyncTask(this, Integer.valueOf(linksMaximum));
-                        currentAsyncTask = mDownloadAsyncTask;
-                        Log.v("MActivity.extractButton", " new AsyncTask created, max links value of: " + linksMaximum);
+            if (!(currentURL == null)) {
+                //if the currentlyRunning boolean says there are no current tasks going, make a new one and reference it
+                DownloadAsyncTask mDownloadAsyncTask = new DownloadAsyncTask(this, crawlMaximum);
+                currentAsyncTask = mDownloadAsyncTask;
+                Log.v("MActivity.extractButton", " new AsyncTask created, max crawl value of: " + crawlMaximum);
 
-                        //new task created so set boolean to true
-                        currentlyRunning = true;
-                        progressBar.setVisibility(View.VISIBLE);
+                //new task created so set boolean to true
+                currentlyRunning = true;
+                progressBar.setVisibility(View.VISIBLE);
+                dataFeedHolder.setVisibility(View.VISIBLE);
 
-                        //store the url query as a string so we can do stuff with it later
-                        queriedURL = NetworkUtils.makeURL(inputURL.getText().toString());
+                //store the url query as a string so we can do stuff with it later
+                queriedURL = NetworkUtils.makeURL(inputURL.getText().toString());
 
-                        //execute the asyncTask
-                        mDownloadAsyncTask.execute(currentURL);
-                    } else {
-                        Toast.makeText(this, "Bad URL! Try again", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Toast.makeText(this, "Cannot do two tasks at once!", Toast.LENGTH_SHORT).show();
-                }
+                //execute the asyncTask
+                mDownloadAsyncTask.execute(currentURL);
             } else {
-                Toast.makeText(this, "Cannot extract from an empty URL!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Bad URL! Try again", Toast.LENGTH_SHORT).show();
             }
+
         } else {
-            Toast.makeText(this, "Network unavailable!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Cannot extract from an empty URL!", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -224,12 +243,13 @@ public class MainActivity extends AppCompatActivity implements FetchCallback {
 
             urlsDiscovered.setText(urlsFound.toString());
 
-            s = RegexUtils.cleanText(doc.body().text(), filterMonths, filterDays, filterCommon, filterInternetCommon);
+            s = RegexUtils.cleanText(doc.body().text(), filterMonths, filterDays, filterCommon, filterInternetCommon, filterGeography);
 
 
             //set the desired text in the box
             if (!(s.equals(""))) {
                 dataFeed.setText(s);
+                dataFeedHolder.setVisibility(View.GONE);
 
                 //use frequency map generate in Abathur, append values to topWords TextView
                 topWords.setText(Abathur.findFrequency(s));

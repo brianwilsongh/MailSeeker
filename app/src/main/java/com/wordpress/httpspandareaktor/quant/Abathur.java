@@ -3,6 +3,8 @@ package com.wordpress.httpspandareaktor.quant;
 import android.util.Log;
 import android.view.View;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -16,13 +18,17 @@ import java.util.TreeMap;
  * Created by brian on 3/20/17.
  */
 
-public class Abathur {
+public final class Abathur {
+
+private static int wordCount = 0;
 
     public static String findFrequency(String str){
         HashMap<String, Integer> map = new HashMap<>();
         String[] wordsArray = str.split("\\s+");
 
         for (String word : wordsArray){
+            //it's a word, thus increment the total word counter
+            wordCount ++;
             String stringLowerCase = word.toLowerCase();
             if (map.containsKey(stringLowerCase)){
                 int count = map.get(stringLowerCase) + 1;
@@ -57,10 +63,18 @@ public class Abathur {
         StringBuilder returner = new StringBuilder();
 
         for (HashMap.Entry<String, Integer> entry : entryList) {
+            //get the word
             returner.append(entry.getKey());
-            returner.append(": ");
-            returner.append(entry.getValue());
-            returner.append("  -  ");
+            returner.append(" ");
+            //get the number of times the word appears
+            returner.append(String.format("(count: %s)", entry.getValue()));
+            double statFreq  = (double) (entry.getValue() * 100) / wordCount;
+            //truncate the decimal by formatting it, rounding to ceiling for last digit
+            DecimalFormat decimalFormat = new DecimalFormat("##.###");
+            decimalFormat.setRoundingMode(RoundingMode.CEILING);
+            returner.append(String.format(" (frequency: %s", decimalFormat.format(statFreq)));
+            returner.append("%)");
+            returner.append("\n");
         }
         Log.v("Abathur.sortMap", " made string " + returner.toString());
         return returner.toString();

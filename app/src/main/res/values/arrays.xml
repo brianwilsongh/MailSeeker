@@ -1,29 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <integer-array name="arrayMaxPagesValues">
+        <item>0</item>
         <item>1</item>
         <item>2</item>
-        <item>5</item>
-
-        <item>10</item>
-        <item>15</item>
-        <item>25</item>
-        <item>50</item>
-        <item>100</item>
     </integer-array>
 
     <string-array name="arrayMaxPages">
 
-        <item>"1"</item>
-        <item>"2"</item>
-        <item>"5"</item>
-
-        <item>"10"</item>
-        <item>"15"</item>
-        <item>"25"</item>
-        <item>"50"</item>
-        <item>"100"</item>
-
+        <item>"Body Tags"</item>
+        <item>"Paragraphs"</item>
+        <item>"Entire Document"</item>
     </string-array>
 
 </resources>
