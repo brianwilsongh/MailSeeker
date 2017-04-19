@@ -9,13 +9,57 @@
 
 
     <LinearLayout
+        android:id="@+id/topSection"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Find emails containing:"
+                android:textColor="@color/colorAccent" />
+
+            <EditText
+                android:id="@+id/searchTermField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Leave blank to find first ten"
+                android:inputType="text"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Within this domain:"
+                android:textColor="@color/colorAccent" />
+
+            <EditText
+                android:id="@+id/inputURL"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="http://www.example.com" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp">
 
 
             <Button
@@ -26,7 +70,7 @@
                 android:onClick="extractButton"
                 android:paddingEnd="20dp"
                 android:paddingStart="20dp"
-                android:text="Extract"
+                android:text="Seek"
                 android:textColor="@android:color/white"
                 android:textStyle="bold" />
 
@@ -38,158 +82,68 @@
                 android:onClick="clearURL"
                 android:paddingEnd="20dp"
                 android:paddingStart="20dp"
-                android:text="Clear"
+                android:text="Clear URL"
                 android:textColor="@android:color/white" />
 
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:text="Pages to Crawl:"
-                    android:textColor="@color/colorAccent" />
-
-                <EditText
-                    android:id="@+id/maxPagesCrawl"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Enter number"
-                    android:inputType="number"
-                    android:textSize="12sp" />
-
-            </LinearLayout>
-
         </LinearLayout>
-
-        <EditText
-            android:id="@+id/inputURL"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:hint="http://www.example.com" />
 
 
     </LinearLayout>
 
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/progressBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
+        android:layout_margin="20dp"
+        android:orientation="vertical"
         android:visibility="gone">
 
-        <ProgressBar
-            android:id="@+id/ProgressCircle"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_centerInParent="true"
-            android:layout_marginBottom="40dp" />
-
-        <ProgressBar
-            android:id="@+id/innerProgressCircle"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_centerInParent="true"
-            android:rotation="180" />
-
-        <TextView
-            android:id="@+id/progressText"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/ProgressCircle"
-            android:layout_marginTop="30dp"
-            android:text="Sending query..."
-            android:textAlignment="center" />
+            android:layout_height="wrap_content">
+
+            <ProgressBar
+                android:id="@+id/ProgressCircle"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_marginEnd="20dp"/>
+
+            <TextView
+                android:id="@+id/progressText"
+                android:layout_width="match_parent"
+                android:textAlignment="textEnd"
+                android:layout_height="wrap_content"
+                android:text="Sending query..." />
+
+        </LinearLayout>
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/progressText"
-            android:layout_centerHorizontal="true"
-            android:alpha="0.6"
+            android:layout_gravity="center"
+            android:background="@color/colorAccent"
             android:onClick="killTask"
-            android:text="Kill Task" />
+            android:text="Kill Task"
+            android:textColor="#FFFFFF" />
 
-    </RelativeLayout>
-
-    <TextView
-        android:id="@+id/topWords"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="20dp"
-        android:maxLines="10"
-        android:textAlignment="center"
-        android:textSize="17sp"
-        android:visibility="gone" />
+    </LinearLayout>
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="2">
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp" >
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:id="@+id/urlsDiscovered"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:layout_weight="1"
-                android:text="--end--"
-                android:textColor="#0000ff"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/urlsHit"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_margin="5dp"
-                android:layout_weight="1"
-                android:text="--end--"
-                android:textColor="#FF0000" />
-
-        </LinearLayout>
+    <TextView
+        android:id="@+id/emailDisplay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:textSize="18sp"
+        android:textColor="@color/colorPrimaryDark"
+        android:visibility="visible" />
 
     </ScrollView>
-
-    <FrameLayout
-        android:id="@+id/dataFeedHolder"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_margin="20dp"
-        android:layout_weight="3"
-        android:visibility="gone">
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="top"
-            android:alpha="0.4"
-            android:elevation="0dp"
-            android:scaleType="fitXY"
-            android:src="@drawable/sheep_bg" />
-
-
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:id="@+id/dataFeed"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="THIS IS A TEST"
-                android:textColor="#000000" />
-        </ScrollView>
-
-
-    </FrameLayout>
 
 
 </LinearLayout>

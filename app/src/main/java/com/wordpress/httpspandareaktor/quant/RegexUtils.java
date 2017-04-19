@@ -6,108 +6,49 @@ import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Created by brian on 3/20/17.
- */
 
 public class RegexUtils {
 
 
-    public static String cleanText(String input, boolean filterMonth, boolean filterDay, boolean filterCommon, boolean filterInternetCommon, boolean filterGeography) {
-        //booleans are filters that take month, day, very common words like "a" and "the"
-        //split input into array to clean using delimiter of unlimited whitespace to capture everything
-        String[] dirtyWordArray = input.split("\\s+");
-        StringBuilder cleanString = new StringBuilder();
+    public static String[] purify(String input, String searchTerm) {
+        //for testing
+        searchTerm = "";
+        //reverse email dodging tactics
+        String fixedInput = input.replaceAll("[\\s*\\[?\\(?]+[dD][oO][tT][\\)?\\]?\\s*]+", "\\.").replaceAll("[\\s*\\[?\\(?]+[aA][tT][\\)?\\]?\\s*]+", "@");
 
-        //use enhanced for loop to clean out non-alpha
-        //include words with comma, period, exclaimation, apostrophe at start/fin, etc...
-        for (String word : dirtyWordArray) {
-            if (word.matches("[a-z[A-Z]]+") && !word.matches("null")) {
-                //if the word is made up entirely of alphabet chars
-                if (passesFilter(word.toLowerCase(), filterMonth, filterDay, filterCommon, filterInternetCommon, filterGeography)) {
-                    cleanString.append(word);
-                    cleanString.append(" ");
-                }
+        //take out everything except the emails within the string, return as array
+        //split input into array using delimiter of unlimited whitespace to capture everything
+        String[] splitWordArray = fixedInput.split("\\s+");
+        Log.v("RegexUtils.purify", "length of this array: " + splitWordArray.length);
 
+        //HashSet will hold the emails for this purification
+        HashSet<String> emailsFound = new HashSet<String>();
 
-            } else if ((word.matches("[a-z[A-Z]]+\\!") || word.matches("[a-zA-Z]+\\.?") || word.matches("[a-zA-Z]+\\??"))
-                    && !word.matches("null")) {
-                //if the word is at the end of a sentence with a !, . or ? then...
-                if (passesFilter(word.toLowerCase(), filterMonth, filterDay, filterCommon, filterInternetCommon, filterGeography)) {
-                    cleanString.append(word.substring(0, word.length() - 1));
-                    cleanString.append(" ");
-                }
-            } else {
-                cleanString.append("");
+        for (String word : splitWordArray) {
+
+            if (word != null) {
+                //if the word fits the format of an email (e.g. john.doe@email.com), consider it for HashSet
+
+                    //strip out only the text between potential HTML tags
+                    String regex = "[^>=\"\\/@]+@\\w+\\.[\\w&&[^<\"]]+";
+                    Pattern pattern = Pattern.compile(regex);
+                    Matcher matcher = pattern.matcher(word);
+                    if (matcher.find() && word.toLowerCase().contains(searchTerm.toLowerCase())) {
+                        //if the word contains searchTerm ("" by default), add it in
+                        word = matcher.group();
+                        word = word.replaceAll("mailto:", "");
+                        emailsFound.add(word);
+                        Log.v("RegexUtils.purify", " found an email: " + word);
+                    }
             }
         }
-        Log.v("RegexUtils.cleanText", "cleanString is: " + cleanString);
-        return cleanString.toString();
 
-    }
-
-
-    private static boolean passesFilter(String word, boolean filterMonth, boolean filterDay, boolean filterCommon, boolean filterInternetCommon, boolean filterGeography) {
-        //TODO: make this section better, more robust
-        String[] monthStrings = new String[]{"january", "february", "march", "april", "may", "june", "july",
-                "august", "september", "october", "november", "december", "jan", "feb", "mar", "apr", "may", "jun",
-                "jul", "aug", "sep", "oct", "nov", "dec"};
-
-        String[] dayStrings = new String[]{"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"};
-
-        String[] commonStrings = new String[]{"the", "be", "to", "of", "and", "a", "in", "that", "is",
-                "have", "i", "it", "its", "for", "not", "on", "with", "he", "she", "his", "her", "as", "you", "do", "at",
-                "or", "a", "an", "will", "their", "there", "by", "date",
-                "how", "from", "et", "more", "are", "your", "am", "pm", "site", "why", "where", "our", "this",
-                "about", "us", "if", "about", "find", "but", "out", "we", "all", "after", "before",
-                "say", "new", "what", "over", "lol", "just", "being", "was", "has", "still", "who", "into",
-                "me", "they", "go", "hi", "can", "my", "welcome", "something", "it", "there", "around", "used", "something",
-                "some", "around", "so", "up", "every", "them", "same", "need", "such", "also", "were", "which", "between", "than",
-                "when", "through", "could", "other", "made", "been", "very", "would", "since", "thus", "later", "much",
-                "another", "although", "while", "usually", "make", "only", "good", "get", "even", "now", "must", "asked", "page",
-                "wow", "here", "big", "small", "one", "two", "three", "four", "five", "next", "see", "over", "under", "take",
-                "top", "bottom", "it", "well", "most", "no", "had", "him", "least", "day", "world", "read", "little", "big", "nice"};
-
-        String[] internetCommon = new String[]{"blog", "blogs", "comment", "comments", "click", "feedback", "account",
-                "browser", "password", "video", "audio", "download", "facebook", "twitter", "google", "apple", "youtube", "wordpress",
-                "pinterest", "drupal", "archives", "cookies", "search", "subscribe", "subscription", "terms", "privacy", "settings",
-                "home", "mobile", "contact", "email", "rss", "share", "pics", "pictures", "image", "followers", "follow",
-                "web", "log", "html", "css", "javascript", "app", "submit", "reply", "name", "sign", "account", "online", "navigation",
-        "bar", "toolbar"};
-
-        String[] geographyStrings = new String[]{"new", "york", "london", "paris", "berlin", "munich", "frankfurt", "stockholm",
-                "helinski", "oslo", "moscow", "beijing", "seoul", "pyongyang", "kyoto",
-                "tokyo", "hong", "kong", "san", "francisco", "los", "angeles", "chicago", "dublin", "rome", "madrid", "warsaw",
-                "kiev", "instanbul", "cairo", "tehran", "baghdad", "riyadh", "shanghai", "mumbai", "bombay", "dehli", "bangkok", "singapore",
-                "taipei", "melborne", "sydney", "canberra", "vancouver", "ottawa", "montreal", "calgary", "mexico", "city", "rio", "buenos",
-                "aires", "damascus", "usa", "united", "states", "america", "uk", "kingdom", "france", "germany", "italy", "spain", "russia", "poland",
-        "sweden", "norway", "finland", "greece", "ukraine", "saudi", "arabia", "iran", "israel", "syria", "iraq", "india", "china", "japan",
-         "taiwan", "thailand", "canada", "australia", "mexico", "indonesia", "california", "brazil", "africa", "egypt", "ireland", "portugal",
-        "austria", "hungary", "romania", "turkey"};
-
-        if (Arrays.asList(monthStrings).contains(word)) {
-            return false;
-        }
-
-        if (Arrays.asList(dayStrings).contains(word)) {
-            return false;
-        }
-
-        if (Arrays.asList(commonStrings).contains(word) || Arrays.asList(commonStrings).contains(word + "s")) {
-            return false;
-        }
-
-        if (Arrays.asList(internetCommon).contains(word)) {
-            return false;
-        }
-
-        if (Arrays.asList(geographyStrings).contains(word)) {
-            return false;
-        }
-        return true;
+        //turn the hash set into an array of strings
+        return emailsFound.toArray(new String[emailsFound.size()]);
 
     }
 

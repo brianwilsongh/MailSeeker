@@ -23,6 +23,7 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -36,8 +37,11 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
     //create instance of listener interface
     private FetchCallback listener;
 
+    //the search term if it exists
+    private String mSearchTerm;
+
     //String array for onProgressUpdate
-    private String[] updateArray = new String[3];
+    private List<Object> updateArray = new ArrayList<Object>();
 
     //max links to hit, set by preferences menu
     private int mlinksMaximum;
@@ -52,11 +56,11 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
     //first link visited
     private String firstLinkAsString = "";
 
-    public DownloadAsyncTask(FetchCallback listener, int linksMaximum) {
+    public DownloadAsyncTask(FetchCallback listener, String searchTerm) {
         //set the declared FetchCallback named "listener" to the listener provided in constructor
         //this links this DLAsyncTask to MainActivity, which is instance of FetchCallback interface
         this.listener = listener;
-        mlinksMaximum = linksMaximum;
+        mSearchTerm = searchTerm;
     }
 
     @Override
@@ -90,7 +94,6 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
 
         //add the lastest url to visited URLs arraylist, increment links hit counter, add to bucket
         visitedLinks.add(urls[0]);
-        Log.v("DLAsync", " add to visitedLinks set: " + urls[0]);
         if (!lastResult.equals("")) {
             //if the last result wasn't empty, it was a page hit. add the results into bucket
             pagesHit ++;
@@ -104,7 +107,7 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
         Log.v("DLAsync", " completed INITIAL pull of links from first query");
         cleanCollectedUrls();
 
-        while (pagesHit < mlinksMaximum && !isCancelled()) {
+        while (!isCancelled()) {
             //while the links hit counter is below the max, and when collectedLinks isn't empty
 
             //clean links, then make iterator for the collectedLinks arraylist
@@ -116,16 +119,21 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
                 //try a fetch using latest URL if visitedLinks does NOT contain this object
                 try {
                     //sleep to prevent server from kicking off ip
-                    sleepMilliseconds(5000);
+                    sleepMilliseconds(500);
                     Log.v("DLasync.doinBG", " now attempting fetch of: " + thisUrl.toString());
+                    sleepMilliseconds(500);
 
                     //send update before and after fetch is executed
 
-                    sendUpdate("Attempting iteration " + pagesHit + " from pull list... ", "", "");
+                    sendUpdate("Seeker moving into iteration " + pagesHit + "... ", null);
 
+                    //this is the supposed HTML page we got from the server
                     lastResult = fetch(thisUrl);
+                    sleepMilliseconds(500);
+                    //extract emails and send
+//                    Document document = Jsoup.parse(lastResult);
+                    sendUpdate("Purifying HTML contents...", RegexUtils.purify(lastResult, mSearchTerm));
 
-                    sendUpdate("Extracting data from : " + thisUrl + "...", lastResult, thisUrl.toString() + "\n");
 
 
                 } catch (IOException e) {
@@ -151,8 +159,6 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
                     Log.v("downloadAsyncTask", "visited links is now:" + pagesHit);
                     Log.v("the url ", "I just fetched: " + thisUrl.toString());
                     Log.v("the result", "was: " + lastResult);
-                    Log.v("visited url array:", " " + visitedLinks);
-                    Log.v("collected url array:", " " + collectedLinks);
 
                 } else {
                     //the fetch was not fruitful so don't do pagesHit++, but we've visited this link. remove from collected
@@ -185,7 +191,7 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
     protected void onProgressUpdate(String... values) {
         //send info back to main so user can know data is coming in
         listener.onUpdate(updateArray);
-
+        updateArray.clear();
     }
 
     @Override
@@ -346,12 +352,11 @@ public class DownloadAsyncTask extends AsyncTask<URL, String, String> {
         return returnBoolean;
     }
 
-    private void sendUpdate(String progressText, String dataText, String lastUrl){
+    private void sendUpdate(String progressText, String[] emailsArray){
         //builds an update array to send to onProgressUpdate by calling publishProgress
-        updateArray[0] = progressText;
-        updateArray[1] = dataText;
-        updateArray[2] = lastUrl;
-        publishProgress(updateArray);
+        updateArray.add(progressText);
+        updateArray.add(emailsArray);
+        publishProgress();
     }
 
 
